@@ -1,0 +1,99 @@
+/* =====================================================================
+   Planet Opera · Draft 03
+   Part 1 · variables, scenes, controls and the live synthesized score
+   ===================================================================== */
+/* host = the Compose page's mount box; site = window.ORBEATS (the shared header, volume, captions and now-playing bar).
+   $ looks up an element by id inside the page, so ids never clash with the site. */
+const $=id=>host.querySelector('#'+id),canvas=$('universe');
+const on=(t,e,f,o)=>{t.addEventListener(e,f,o);onStop(()=>t.removeEventListener(e,f,o))};
+let alive=true;onStop(()=>{alive=false});
+const V3=THREE.Vector3,DEG=Math.PI/180,TAU=Math.PI*2,R=1.6; // R = Earth radius in scene units
+
+/* The eight variables. Each one has a colour, a musical voice and a region of Earth it "plays". */
+const D=[{k:'heat',n:'Ocean warmth',c:'#ffcb7b',voice:'Brass · brightness',v:38},{k:'flow',n:'Current speed',c:'#80ddff',voice:'Strings · rhythm',v:65},{k:'aero',n:'Aerosols',c:'#d3a0ff',voice:'Percussion · texture',v:35},{k:'air',n:'Air pollutants',c:'#f3a7c5',voice:'Brass · tension',v:22},{k:'co2',n:'Carbon dioxide',c:'#ffaf80',voice:'Bass · depth',v:40},{k:'water',n:'Water vapor',c:'#b0e9ff',voice:'Strings · layers',v:56},{k:'forest',n:'Forest height',c:'#9ae9b2',voice:'Woodwinds · pitch',v:68},{k:'city',n:'Night lights',c:'#ffe5a5',voice:'Bells · sparkle',v:48}];
+const KEYS=D.map(d=>d.k),IDX=Object.fromEntries(KEYS.map((k,i)=>[k,i])),COLOR=Object.fromEntries(D.map(d=>[d.k,d.c]));
+const defaults=Object.fromEntries(D.map(d=>[d.k,d.v]));
+/* Shader colours are written straight to the screen, so they use plain sRGB numbers (0-1). */
+const hexRGB=h=>{const n=parseInt(h.slice(1),16);return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255]};const RGB=Object.fromEntries(D.map(d=>[d.k,hexRGB(d.c)]));
+const STRAND_HEX={heat:'#ffbf5e',flow:'#5fd4ff',aero:'#cc84ff',air:'#ff93bf',co2:'#ff9a52',water:'#74bfff',forest:'#9ae9b2',city:'#ffd47a'};
+let P={...defaults},smooth={...P},chapter='all',running=false,muted=!site.settings.audio,voice=false,reduced=site.settings.reducedMotion,siteReduced=reduced,turnedAudioOn=false;
+let yaw=-.34,pitch=.12,zoom=1,time=0,last=0,beat=0,activeVar='flow',nightMix=0;
+var dashReady=false;let AC,master,compressor,analyser,scheduleId,nextNote=0,audioEpoch=0,audioData,audioLevel=0,changeTimer,feedbackTimer;
+const activeNodes=new Set(),beatEvents=[];
+
+/* Scenes: values for the sliders + the variable the Earth turns toward. */
+const scenes={all:{name:'Living Earth',focus:null,note:'A living globe wrapped in flowing light. Each variable changes a visual layer and a musical voice.',values:defaults},ocean:{name:'Ocean currents & temperature',focus:'heat',note:'Inspired by ECCO2 surface currents and sea temperature. Blue and gold strands carry the ocean’s musical phrase.',values:{heat:66,flow:85,aero:10,air:7,co2:20,water:45,forest:38,city:12}},deep:{name:'Perpetual Ocean',focus:'flow',note:'Inspired by NASA’s deep and surface ocean flows. Long blue and cyan loops wrap around the planet.',values:{heat:28,flow:95,aero:4,air:4,co2:18,water:55,forest:25,city:5}},aerosols:{name:'Aerosols in motion',focus:'aero',note:'Dust, sea salt, smoke and sulfates travel through the air. Violet and blue strands give them a musical presence.',values:{heat:48,flow:60,aero:90,air:40,co2:25,water:28,forest:35,city:15}},air:{name:'Air quality',focus:'air',note:'Inspired by GEOS-CF views of PM2.5, ozone, CO and nitrogen oxides. Use the mix to explore a denser atmosphere.',values:{heat:40,flow:65,aero:65,air:88,co2:35,water:35,forest:32,city:45}},carbon:{name:'Carbon dioxide',focus:'co2',note:'Inspired by modeled CO₂ transport in January–March 2020. Amber ribbons and a low bass voice follow the carbon layer.',values:{heat:56,flow:65,aero:15,air:25,co2:92,water:30,forest:40,city:30}},water:{name:'Atmospheric rivers',focus:'water',note:'Inspired by long pathways of atmospheric moisture. Pale blue ribbons sweep around the globe with flowing strings.',values:{heat:36,flow:78,aero:10,air:5,co2:20,water:94,forest:50,city:10}},forest:{name:'Forest height',focus:'forest',note:'Inspired by GEDI observations. Greener land and rising woodwind notes represent a taller imagined canopy.',values:{heat:28,flow:38,aero:5,air:5,co2:20,water:65,forest:96,city:10}},night:{name:'Earth at night',focus:'city',note:'Inspired by Black Marble night-light imagery. Golden city clusters sparkle with bell-like notes.',values:{heat:30,flow:35,aero:10,air:20,co2:30,water:20,forest:38,city:96}}};
+
+/* Build the eight sliders. Moving one sends that variable's notes from its slider at its region of Earth. */
+D.forEach(d=>{const div=document.createElement('div');div.className='control';div.style.setProperty('--c',d.c);div.innerHTML=`<label for="${d.k}">${d.n}<output for="${d.k}" id="v-${d.k}">${d.v}</output></label><div class="voice-name" id="help-${d.k}">${d.voice}</div><input type="range" id="${d.k}" min="0" max="100" step="1" value="${d.v}" aria-describedby="help-${d.k}" aria-valuetext="${d.v} out of 100, creative level">`;$('variables').appendChild(div);
+  $(d.k).addEventListener('focus',()=>{activeVar=d.k});
+  $(d.k).addEventListener('input',()=>{const old=P[d.k];P[d.k]=Number($(d.k).value);activeVar=d.k;sync();onVariableChanged(d.k,old,P[d.k]);emitChange({type:'slider',k:d.k,v:P[d.k]});clearTimeout(changeTimer);changeTimer=setTimeout(()=>announce(`${d.n}: ${P[d.k]} out of 100. ${describeChange(d.k)}`),360)})});
+function describeChange(k){return {heat:'Ocean color and brass brightness change together.',flow:'The strands and musical pulse change speed.',aero:'Atmospheric wisps and percussion become more or less active.',air:'The haze and musical tension change.',co2:'Amber ribbons and the bass voice change strength.',water:'Clouds, moisture ribbons and strings change strength.',forest:'Land color, canopy marks and woodwind pitch change.',city:'City lights and bell notes change brightness.'}[k]}
+function sync(){if(dashReady)dashUpdate();D.forEach(d=>{$(d.k).value=P[d.k];$('v-'+d.k).textContent=P[d.k];$(d.k).setAttribute('aria-valuetext',P[d.k]+' out of 100, creative level')});$('score-state').textContent=`${Math.round(72+P.flow*.65)} BPM · ${P.air>60?'minor color':'major color'} · ${scenes[chapter].name}`}
+function announce(text,read=true){$('announcement').textContent=text;$('feedback').textContent=text;$('feedback').classList.add('visible');clearTimeout(feedbackTimer);feedbackTimer=setTimeout(()=>$('feedback').classList.remove('visible'),4000);if(read&&voice&&'speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.95;speechSynthesis.speak(u)}}
+/* keep a handle to each slider row so notes can start from it */
+D.forEach(d=>d.div=$(d.k).parentElement);
+$('chapter').onchange=()=>{chapter=$('chapter').value;P={...scenes[chapter].values};sync();$('chapter-note').textContent=scenes[chapter].note;setScene(scenes[chapter].name);onChapterChanged(chapter);emitChange({type:'scene',scene:chapter});announce(scenes[chapter].name+'. '+scenes[chapter].note)};
+$('reset').onclick=()=>{P={...scenes[chapter].values};yaw=-.34;pitch=.12;zoom=1;focusState.hold=0;sync();emitChange({type:'scene',scene:chapter});announce('Scene controls and view reset.')};
+function setReduced(){host.classList.toggle('motion-off',reduced);$('motion').setAttribute('aria-pressed',reduced);$('motion').textContent=reduced?'Motion reduced':'Reduce motion'}setReduced();
+$('motion').onclick=()=>{reduced=!reduced;setReduced();announce(reduced?'Motion reduced. Music and controls remain active.':'Full motion on.')};
+$('describe').onclick=()=>{const text=`A realistic Earth floats in space with the Moon circling it. When you move a variable, musical notes travel from that control to the part of Earth it describes, and that region lights up. Glowing strands flow across the oceans and atmosphere. ${scenes[chapter].note} ${running?'Music is playing.':'Press Play music to hear the score.'}`;announce(text,false);if('speechSynthesis'in window){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}};
+$('voice').onclick=()=>{voice=!voice;$('voice').textContent='Voice: '+(voice?'on':'off');$('voice').setAttribute('aria-pressed',voice);if(!voice&&'speechSynthesis'in window)speechSynthesis.cancel();announce('Voice guide '+(voice?'on':'off'))};
+$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await host.querySelector('.po').requestFullscreen()}catch{announce('Full screen is unavailable in this preview. Open the HTML in your browser.',false)}};
+$('zoom-in').onclick=()=>zoom=Math.min(1.45,zoom+.12);$('zoom-out').onclick=()=>zoom=Math.max(.65,zoom-.12);
+
+/* ---------- Web Audio score (scheduled ahead for reliable sound) ---------- */
+/* The score plays through the site's shared audio output, so the site's Volume slider and Audio switch control it. */
+function makeAudio(){if(AC)return;const a=site.getAudio();if(!a)throw Error('Audio is not supported in this browser');AC=a.context;master=AC.createGain();master.gain.value=.7;compressor=AC.createDynamicsCompressor();compressor.threshold.value=-15;compressor.ratio.value=4;analyser=AC.createAnalyser();analyser.fftSize=128;audioData=new Uint8Array(analyser.frequencyBinCount);master.connect(compressor);compressor.connect(analyser);compressor.connect(a.output);onStop(()=>{try{master.disconnect();compressor.disconnect();analyser.disconnect()}catch{}})}
+const hz=n=>130.8128*Math.pow(2,n/12);
+function note(n,t,len,type,vol,pan=0){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),f=AC.createBiquadFilter();o.type=type;o.frequency.setValueAtTime(hz(n),t);f.type='lowpass';f.frequency.value=type==='sawtooth'?700+P.heat*30:6500;o.connect(f);f.connect(g);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,vol),t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+len);let p;if(AC.createStereoPanner){p=AC.createStereoPanner();p.pan.value=pan;g.connect(p);p.connect(master)}else g.connect(master);activeNodes.add(o);o.onended=()=>{activeNodes.delete(o);o.disconnect();f.disconnect();g.disconnect();if(p)p.disconnect()};o.start(t);o.stop(t+len+.03)}
+function drum(t,v){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(115,t);o.frequency.exponentialRampToValueAtTime(43,t+.22);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.45);o.connect(g);g.connect(master);activeNodes.add(o);o.onended=()=>{activeNodes.delete(o);o.disconnect();g.disconnect()};o.start(t);o.stop(t+.5)}
+/* Every musical voice announces itself with a "beat event" that names the variable it belongs to.
+   Each event sends a note from that variable's slider to that variable's region, so what you hear is what you see. */
+const ev=(t,k)=>beatEvents.push({t,k});
+function score(t){const root=[0,5,9,7][Math.floor(beat/8)%4],third=P.air>60?3:4,scale=[0,third,7,12,7,third+12,14,19];
+  if(beat%4===0){note(root,t,1.6,'sawtooth',.07+P.heat*.0011,-.35);ev(t,'heat');note(root-12,t,1.4,'sine',.08+P.co2*.0017);ev(t,'co2');note(root+7,t,1.8,'triangle',.04+P.water*.001,.35);ev(t,'water')}
+  if(beat%4===2){note(root+scale[(beat>>1)%8]+19,t,.4,'triangle',.02+P.flow*.0006,.25);ev(t,'flow')}   /* strings · rhythm */
+  if(beat%8===4&&P.air>20){note(root+6,t,1.2,'sawtooth',.012+P.air*.0004,-.2);ev(t,'air')}               /* brass · tension */
+  if(beat%(P.forest>45?1:2)===0){note(root+scale[beat%8]+12+Math.round(P.forest/35),t,.55,'sine',.06+P.forest*.001,-.15);ev(t,'forest')}
+  if(beat%(P.aero>55?1:4)===0){drum(t,.06+P.aero*.002);ev(t,'aero')}
+  if(P.city>30&&beat%2===0){note(root+scale[beat%8]+24,t,.65,'triangle',P.city*.0009,.3);ev(t,'city')}
+  beat++}
+function scheduler(){if(!running||!AC||AC.state!=='running'||document.hidden)return;while(nextNote<AC.currentTime+.12){score(nextNote);nextNote+=60/(72+P.flow*.65)/2}}
+/* One short, distinct accent per variable. The pitch climbs with the slider value (a pentatonic scale). */
+const PENTA=[0,2,4,7,9,12,14,16,19,21];
+function playAccent(k,val,t0){if(!AC||AC.state!=='running')return;const t=(t0||AC.currentTime)+.01,i=Math.max(0,Math.min(9,Math.floor(val/100*9.99))),s=PENTA[i];
+  ({heat:()=>note(s+12,t,.5,'sawtooth',.09,-.2),flow:()=>note(s+19,t,.35,'triangle',.12,.3),aero:()=>drum(t,.16),air:()=>{note(6+s%5,t,.6,'sawtooth',.05,-.2);note(13+s%5,t,.6,'sawtooth',.04,.2)},co2:()=>note(s%7-12,t,.8,'sine',.2),water:()=>note(s+12,t,.9,'triangle',.1,-.3),forest:()=>note(s+14,t,.6,'sine',.16,-.1),city:()=>{note(s+31,t,.9,'triangle',.09,.4);note(s+43,t,.7,'sine',.04,.4)}})[k]()}
+/* Play / pause. Starting turns the site's Audio on if needed and pauses the site's own background music while this page plays. */
+function stopRunning(){running=false;clearInterval(scheduleId);beatEvents.length=0;for(const n of activeNodes){try{n.stop()}catch{}}updatePlayback();site.holdMusic(false);site.setNowPlaying(null);if(turnedAudioOn){turnedAudioOn=false;site.setAudio(false)}}
+async function toggleMusic(){const token=++audioEpoch;if(running){stopRunning();return}try{makeAudio();site.holdMusic(true);if(!site.settings.audio){turnedAudioOn=true;site.setAudio(true)}muted=false;await AC.resume();if(token!==audioEpoch)return;if(AC.state!=='running')throw Error('Sound could not start');running=true;nextNote=AC.currentTime+.025;beat=0;scheduler();scheduleId=setInterval(scheduler,30);$('launch').hidden=true;updatePlayback();pushNP();announce('Music is playing. Move any variable to change the sound and send notes from its slider.',false)}catch(e){site.holdMusic(false);$('music-state').textContent='Sound could not start';$('music-state').classList.add('audio-error');announce('Sound could not start here. Press Play music again, or try Chrome or Edge.',false)}}
+function updatePlayback(){host.classList.toggle('is-playing',running);$('play').textContent=running?'❚❚':'▶';$('play').setAttribute('aria-label',running?'Pause music':'Play music');$('play').setAttribute('aria-pressed',running);$('music-state').textContent=running?(muted?'Now playing · muted':'Now playing'):'Music paused';$('music-state').classList.remove('audio-error')}
+$('start').onclick=toggleMusic;$('play').onclick=toggleMusic;
+/* The site's now-playing bar shows the scene name and the caption while the score plays. */
+const NP={title:scenes.all.name,caption:'Press play, then move a variable to hear what it does.'};
+function pushNP(){if(running)site.setNowPlaying('Compose · '+NP.title,NP.caption)}
+function setScene(t){NP.title=t;$('scene-name').textContent=t;pushNP()}
+function setCaption(t){NP.caption=t;$('caption').textContent=t;pushNP()}
+/* Follow the site's settings: Audio switch, captions, reduced motion. (Volume, text size and contrast are handled by the site itself.) */
+on(document,'orbeats:settings',()=>{const s=site.settings;muted=!s.audio;host.classList.toggle('po-nocap',!s.captions);
+  if(s.reducedMotion!==siteReduced){siteReduced=s.reducedMotion;reduced=siteReduced;setReduced()}
+  if(running&&!s.audio){turnedAudioOn=false;stopRunning();announce('Sound is off. Press play to start the music again.',false)}else if(running)updatePlayback()});
+host.classList.toggle('po-nocap',!site.settings.captions);
+/* If the tab is hidden the score pauses; when it comes back, restart the beat cleanly. */
+on(document,'visibilitychange',()=>{if(!AC||!running||document.hidden)return;nextNote=AC.currentTime+.03;beatEvents.length=0});
+onStop(()=>{clearInterval(scheduleId);clearTimeout(changeTimer);clearTimeout(feedbackTimer);if(window.speechSynthesis&&voice)speechSynthesis.cancel();if(running){for(const n of activeNodes){try{n.stop()}catch{}}running=false;site.holdMusic(false);site.setNowPlaying(null);if(turnedAudioOn){turnedAudioOn=false;site.setAudio(false)}}});
+/* ---------- hooks for the Orbeat Board (js/tabs/compose/orbeat-board/) ----------
+   window.ORBEATS.compose: getAudioNode(), getState(), setState(values, scene), isPlaying(), play(), on('change', fn). */
+const changeFns=[];const emitChange=e=>changeFns.slice().forEach(f=>{try{f(e)}catch{}});
+const boardInfo={variables:D.map(d=>({k:d.k,n:d.n})),scenes:Object.fromEntries(Object.entries(scenes).map(([id,sc])=>[id,{name:sc.name,values:{...sc.values}}]))};
+function applyState(vals,sc){if(sc&&sc!==chapter&&scenes[sc]){chapter=sc;$('chapter').value=sc;$('chapter-note').textContent=scenes[sc].note;setScene(scenes[sc].name);onChapterChanged(chapter)}if(vals)P={...P,...vals};sync()}
+site.compose={
+  getAudioNode(){makeAudio();return{context:AC,node:compressor}},           /* tap here to record: after the mix, before the site volume */
+  getState(){return{values:{...P},scene:chapter,...boardInfo}},
+  setState:applyState,
+  isPlaying:()=>running,
+  pause(){if(running)stopRunning()},
+  async play(){if(!running)await toggleMusic();return running},
+  on(name,fn){if(name==='change'){changeFns.push(fn);return()=>{const i=changeFns.indexOf(fn);if(i>-1)changeFns.splice(i,1)}}return()=>{}}
+};
+onStop(()=>{delete site.compose;changeFns.length=0});
