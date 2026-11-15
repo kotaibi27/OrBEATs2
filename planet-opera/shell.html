@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Play · ORBEATS — The Earth Information Jukebox</title>
+<style>
+:root{color-scheme:dark;--bg:#050913;--panel:#080e1cf0;--line:#1b2538;--line2:#2a3a57;--fg:#e9eefb;--muted:#93a0b8;--accent:#8cc8ff;--ts:1;--serif:Georgia,"Source Serif 4","Times New Roman",serif;--sans:system-ui,-apple-system,"Segoe UI",Inter,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:13px var(--sans);min-height:100%}body{overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;background:var(--bg);cursor:grab}canvas:active{cursor:grabbing}
+button,select,input{font:inherit}
+button,select{color:var(--fg);border:1px solid var(--line2);background:#0b1426;border-radius:8px;padding:8px 12px;min-height:36px;cursor:pointer}
+button:hover{background:#142239;border-color:var(--accent)}button:disabled{opacity:.5;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ffe0a2;outline-offset:3px}
+a{color:#a9e0ff;text-underline-offset:3px}
+.eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+/* ---- site header (same look as the ORBEATS website) ---- */
+.site{position:fixed;left:0;right:0;top:0;z-index:5;min-height:76px;display:flex;align-items:center;gap:28px;padding:10px 32px;background:#050913f2;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--fg)}.brand svg{width:40px;height:40px;color:var(--accent)}
+.brand b{display:block;font-weight:500;letter-spacing:.32em;font-size:19px}.brand i{display:block;font:italic 13px var(--serif);color:var(--muted);margin-top:3px}
+.nav{display:flex;gap:6px;margin-left:12px}.nav a{padding:14px 18px;color:var(--muted);text-decoration:none;font-size:16px;letter-spacing:.06em;border-bottom:1px solid transparent}.nav a[aria-current=page]{color:var(--fg);border-bottom-color:var(--accent)}
+.a11y{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tsize{display:flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:8px;padding:0 4px;color:var(--muted);min-height:40px}.tsize button{border:0;background:none;padding:6px 8px;min-height:30px;color:var(--fg)}.tsize span{font-size:13px}.tsize #ts-val{color:var(--fg);min-width:44px;text-align:center}
+.pill{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 14px}.pill svg{width:16px;height:16px}.pill .st{color:var(--muted);font-size:12px}.pill.on{border-color:var(--accent)}.pill.on .st{color:var(--accent)}
+/* ---- page title over the stage ---- */
+.stage-title{position:fixed;left:32px;top:98px;z-index:2;pointer-events:none;max-width:300px}
+.stage-title h1{font:normal clamp(30px,3.4vw,46px) var(--serif);margin:6px 0 8px;letter-spacing:.01em}.stage-title p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.hint{position:fixed;left:32px;bottom:104px;z-index:2;font-size:11px;color:#7f8da6;line-height:1.7;max-width:260px;pointer-events:none}
+/* ---- control panel ---- */
+.panel{position:fixed;right:18px;top:92px;bottom:100px;width:322px;padding:18px;overflow:auto;scrollbar-width:thin;scrollbar-color:#2a3a57 transparent;background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(12px);zoom:var(--ts)}
+.section-title{font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--muted);margin:0 0 10px}
+.panel select{width:100%;margin-bottom:7px;font-size:12px}
+#chapter-note{font-size:11.5px;color:#aab8d0;line-height:1.55;min-height:48px;margin:2px 0 12px}
+.variables{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;border-top:1px solid var(--line);padding:14px 0}
+.control{padding:2px 0;border-radius:8px;transition:background .3s}
+.control label{display:flex;gap:4px;justify-content:space-between;font-size:11.5px;font-weight:600;color:#e0eafb}.control output{color:var(--c);font-weight:500;font-variant-numeric:tabular-nums}
+.control .voice-name{font-size:10px;color:var(--c);margin-top:4px}
+.control input{display:block;width:100%;height:27px;margin:2px 0 0;accent-color:var(--c);cursor:pointer}
+.control.fire{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--c) 22%,transparent))}.control.fire output{text-shadow:0 0 10px var(--c)}
+.layer-list{border-top:1px solid var(--line);padding-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.layer-list label{display:flex;gap:7px;align-items:center;font-size:11.5px;min-height:27px;cursor:pointer}.layer-list input{accent-color:var(--accent);width:15px;height:15px}
+.visual-controls{padding-top:12px;border-top:1px solid var(--line);margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:7px}.visual-controls button{font-size:11px;padding:7px;min-height:34px}
+button[aria-pressed=true].tog{border-color:var(--accent);color:var(--accent)}
+.under-controls{font-size:10.5px;color:#7f8da6;line-height:1.55;margin:12px 0 0}
+/* ---- now playing bar ---- */
+.dock{position:fixed;bottom:0;left:0;right:0;z-index:4;min-height:84px;display:flex;align-items:center;gap:26px;padding:10px 32px;background:#050913f6;border-top:1px solid var(--line)}
+.play{width:62px;height:62px;border-radius:50%;border:0;background:var(--accent);color:#06101f;font-size:22px;font-weight:700;padding:0;flex:none}.play:hover{background:#b6dcff}
+.now{min-width:220px;max-width:360px}.now .eyebrow{color:#a9bbd6;font-size:11px;margin-bottom:5px}.now .title{font:19px/1.2 var(--serif)}.now .sub{font-size:11px;color:#7f8da6;margin-top:4px}
+.cap{flex:1;min-width:120px;border-left:1px solid var(--line);padding-left:24px;font-size:15px;color:var(--muted);line-height:1.4}.cap b{font-weight:400;color:var(--fg)}
+.volume{display:flex;align-items:center;gap:10px;color:var(--fg)}.volume svg{width:20px;height:20px}.volume input{width:150px;accent-color:var(--accent)}
+.meter{display:flex;gap:2.5px;align-items:center;height:22px}.meter span{width:3px;height:100%;border-radius:1px;background:#27467a;opacity:.55;transition:background .08s,opacity .08s}.meter span.on{background:var(--accent);opacity:1}
+.indicator{display:none}
+/* ---- launch card, live caption, dialog ---- */
+.launch{position:fixed;left:calc((100% - 342px)/2);bottom:118px;transform:translateX(-50%);padding:16px 26px;background:#070d1bf0;border:1px solid var(--line2);border-radius:12px;text-align:center;box-shadow:0 15px 80px #0009;min-width:265px;z-index:3}
+.launch h2{font:normal 26px var(--serif);margin:0 0 6px}.launch p{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 12px}.launch .play{width:auto;height:46px;border-radius:23px;padding:0 24px;font-size:15px}.launch[hidden]{display:none}
+.live{position:fixed;left:32px;bottom:150px;padding:8px 12px;border-left:2px solid var(--accent);background:#0a172ccc;color:#cae4fb;max-width:420px;font-size:11.5px;line-height:1.5;pointer-events:none;opacity:0;transition:opacity .2s;z-index:3}.live.visible{opacity:1}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+#labels-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.rlabel{position:absolute;left:0;top:0;font-size:10px;padding:5px 10px 5px 8px;border-radius:8px;background:#060d1bd0;border:1px solid #ffffff22;color:#deefff;white-space:nowrap;will-change:transform,opacity;transition:border-color .2s,box-shadow .2s}
+.rlabel i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;background:var(--c);box-shadow:0 0 8px var(--c)}.rlabel.hit{border-color:var(--c);box-shadow:0 0 16px var(--c)}
+dialog{color:#e6f3ff;background:#0a1221;border:1px solid var(--line2);border-radius:14px;max-width:850px;width:calc(100% - 32px);max-height:88vh;padding:24px}
+dialog::backdrop{background:#020611cc;backdrop-filter:blur(5px)}dialog h2{font:normal 28px var(--serif);margin:0 0 8px}dialog p{color:#b8cde1;font-size:12px;line-height:1.7}
+.dialog-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.source-card{padding:13px;border:1px solid var(--line);background:#0d182b;border-radius:10px}.source-card h3{font-size:13px;margin:0 0 8px}.source-card p{font-size:11px;margin:4px 0 8px}
+.source-card img{display:block;width:100%;height:130px;object-fit:contain;background:#050c16;border-radius:6px;margin:10px 0}.source-card a{font-size:11px}.source-card summary{font-size:11px;color:#9ddcfc;cursor:pointer}
+.source-card small{font-size:9.5px;color:#a3bbd0;display:block;line-height:1.5;margin-top:7px}.source-foot{font-size:11px;color:#a3bbd0;margin-top:16px}
+.skip{position:fixed;left:15px;top:-100px;z-index:9;background:#bdeaff;color:#071527;padding:10px}.skip:focus{top:10px}.audio-error{color:#ffd6a1!important}
+
+/* ---- dashboard ---- */
+.dash{position:fixed;left:18px;top:188px;bottom:100px;width:282px;z-index:3;padding:14px;overflow:auto;scrollbar-width:thin;scrollbar-color:#2a3a57 transparent;background:var(--panel);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(12px);zoom:var(--ts)}
+.dash-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.dash h2{font:normal 20px var(--serif);margin:3px 0 10px}.dash-top button{font-size:11px;padding:4px 10px;min-height:28px}
+.dash.closed{bottom:auto;height:auto;overflow:hidden}.dash.closed .dlast,.dash.closed .drows,.dash.closed .dfoot{display:none}.dash.closed h2{margin-bottom:0}
+.dlast{--c:#8cc8ff;border-left:3px solid var(--c);background:#0d182b;border-radius:0 8px 8px 0;padding:9px 11px;margin-bottom:12px}.dlast .eyebrow{font-size:10px;color:var(--c)}
+.dtitle{font-size:13.5px;font-weight:600;margin:4px 0 6px;line-height:1.35}.dtitle .up{color:#7fe3a5;font-size:11px;white-space:nowrap}.dtitle .down{color:#ffb27a;font-size:11px;white-space:nowrap}
+.dlast p{margin:4px 0;font-size:12px;line-height:1.5;color:#c4d2e8}.dlast p b{color:var(--c);font-weight:600}
+.drow{padding:7px 8px;border-radius:8px;border:1px solid transparent;transition:background .3s,border-color .3s}.drow.changed{background:color-mix(in srgb,var(--c) 14%,transparent);border-color:color-mix(in srgb,var(--c) 55%,transparent)}
+.dhead{display:flex;align-items:center;gap:6px;font-size:11.5px}.dhead b{color:var(--c);font-weight:600;flex:1}.dlvl{color:var(--muted);font-size:10.5px;font-variant-numeric:tabular-nums}
+.dchip{font-size:10px;font-weight:700;color:#06101f;background:var(--c);border-radius:9px;padding:1px 7px;display:none}.dchip.show{display:inline-block}
+.dbar{height:5px;border-radius:3px;background:#16223a;margin:5px 0}.dbar i{display:block;height:100%;width:0;border-radius:3px;background:var(--c);transition:width .25s}
+.dsee{font-size:11px;color:#aab8d0;line-height:1.4}.dfoot{font-size:10px;color:#7f8da6;line-height:1.5;margin:10px 0 0}
+.rlabel.changed{border-color:var(--c);box-shadow:0 0 22px var(--c);font-size:12px;font-weight:600;z-index:2}
+.live,.hint,.stage-title p{display:none}
+body.hc .dash{background:#000}body.hc .dsee,body.hc .dlast p,body.hc .dfoot{color:#e6efff}
+@media(max-width:1099px){.dash{width:250px;left:12px}}
+@media(max-width:760px){.dash{position:relative;left:auto;top:auto;bottom:auto;width:auto;margin:0 12px 110px;zoom:1}.panel{margin-bottom:12px}}
+/* ---- accessibility modes ---- */
+body.hc{--fg:#fff;--muted:#d8e4f7;--line:#6f8fb8;--line2:#9fbbe0;--panel:#000000fa}body.hc .panel,body.hc .dock,body.hc .site{background:#000}body.hc .control .voice-name,body.hc .under-controls,body.hc .hint,body.hc .now .sub{color:#e6efff}
+body.nocap .live,body.nocap .cap{visibility:hidden}
+@media(max-height:800px) and (min-width:761px){.panel{padding:14px}.variables{gap:6px 12px;padding:10px 0}.control input{height:24px}.layer-list{gap:2px 7px;padding-top:7px}.visual-controls{padding-top:8px;margin-top:8px}.under-controls{margin-top:7px}#chapter-note{font-size:10.5px;min-height:32px;margin-bottom:9px}}
+@media(max-width:1180px){.brand i{display:none}.nav a{padding:14px 12px}.site{gap:14px;padding:10px 18px}.tsize{display:none}}
+@media(max-width:1050px){.panel{width:290px;right:12px}.launch{left:calc((100% - 302px)/2)}.dock{gap:16px;padding:10px 18px}.volume input{width:90px}.meter{display:none}.stage-title{left:18px}.hint{left:18px}.nav{display:none}}
+@media(max-width:760px){body{overflow:auto}.site{min-height:64px}.a11y{gap:5px}.pill .lbl{display:none}.pill{padding:0 10px}.stage-title{top:78px;left:16px;max-width:200px}.stage-title p{display:none}.stage-title h1{font-size:26px;margin:2px 0}
+ .panel{position:relative;margin:66vh 12px 110px;width:auto;right:auto;top:auto;bottom:auto;padding:16px;overflow:visible;zoom:1}.variables{grid-template-columns:repeat(4,1fr);gap:9px}.control label{font-size:10px}.control .voice-name{font-size:8px}.layer-list{grid-template-columns:repeat(3,1fr)}.visual-controls{grid-template-columns:repeat(4,1fr)}
+ .launch{top:34vh;bottom:auto;left:50%;padding:14px}.hint{top:60vh;bottom:auto;max-width:none;font-size:9.5px}.live{bottom:auto;top:56vh;left:16px;right:16px;max-width:none}
+ .dock{gap:12px;padding:8px 14px;min-height:76px}.play{width:52px;height:52px}.cap{display:none}.volume input{width:80px}.now{min-width:0}.now .title{font-size:16px}.source-grid{grid-template-columns:1fr}.source-card img{height:160px}}
+@media(max-width:400px){.variables{grid-template-columns:1fr 1fr}.layer-list,.visual-controls{grid-template-columns:1fr 1fr}.brand b{letter-spacing:.2em;font-size:16px}}
+</style></head><body>
+<a href="#controls" class="skip">Skip to Earth controls</a>
+<canvas id="universe" role="img" aria-label="Interactive three dimensional Earth made from NASA imagery, wrapped in luminous flowing strands, with the Moon in orbit. When you move a variable, musical notes travel from that control to the region of Earth it describes. Drag to rotate Earth; use the controls to change its layers and music."></canvas><div id="labels-layer"></div>
+<header class="site">
+ <a class="brand" href="#"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="20" cy="20" r="18"/><circle cx="20" cy="20" r="12"/><circle cx="20" cy="20" r="6"/><circle cx="20" cy="20" r="1.6" fill="currentColor"/></svg><span><b>ORBEATS</b><i>The Earth Information Jukebox</i></span></a>
+ <nav class="nav" aria-label="Main"><a href="#">Explore</a><a href="#" aria-current="page">Play</a><a href="#">Compose</a></nav>
+ <div class="a11y">
+  <div class="tsize" role="group" aria-label="Text size"><span>Text</span><button id="ts-minus" aria-label="Smaller text">A−</button><span id="ts-val">100%</span><button id="ts-plus" aria-label="Larger text">A+</button></div>
+  <button class="pill" id="contrast" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v16" /><path d="M12 4a8 8 0 010 16z" fill="currentColor"/></svg><span class="lbl">Contrast</span><span class="st">Off</span></button>
+  <button class="pill on" id="mute" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 010 6"/></svg><span class="lbl">Audio</span><span class="st">On</span></button>
+  <button class="pill on" id="captions" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 11h2M14 11h2M8 14h3M14 14h2"/></svg><span class="lbl">Captions</span><span class="st">On</span></button>
+ </div>
+</header>
+<div class="stage-title"><div class="eyebrow">02 · Play</div><h1>Play Earth</h1><p>Change a variable. Send a note. Hear Earth respond.</p></div>
+<section class="panel" id="controls" aria-label="Earth variables and visual effects" tabindex="-1"><p class="section-title">Explore the layers</p><label for="chapter" class="sr">Choose an Earth scene</label><select id="chapter"><option value="all">Living Earth · all systems</option><option value="ocean">Ocean currents & temperature</option><option value="deep">Perpetual Ocean · deep flows</option><option value="aerosols">Aerosols in motion</option><option value="air">Air quality</option><option value="carbon">Carbon dioxide</option><option value="water">Atmospheric rivers</option><option value="forest">Forest height</option><option value="night">Earth at night</option></select><p id="chapter-note">A living globe wrapped in flowing light. Each variable changes a visual layer and a musical voice.</p><div class="variables" id="variables"></div>
+<div class="layer-list"><label><input id="threads" type="checkbox" checked>Flowing strands</label><label><input id="particles" type="checkbox" checked>Traveling particles</label><label><input id="glow" type="checkbox" checked>Atmosphere glow</label><label><input id="labels" type="checkbox" checked>Region labels</label><label><input id="spin" type="checkbox" checked>Auto rotation</label><label><input id="notes" type="checkbox" checked>Flying notes</label><label><input id="follow" type="checkbox" checked>Earth turns to notes</label><label><input id="cycle" type="checkbox" checked>Day–night cycle</label></div>
+<div class="visual-controls"><button id="reset">Reset Earth</button><button id="motion" class="tog" aria-pressed="false">Reduce motion</button><button id="describe">Describe scene</button><button id="voice" class="tog" aria-pressed="false">Voice: off</button><button id="zoom-out">Zoom out −</button><button id="zoom-in">Zoom in +</button><button id="sources">NASA sources</button><button id="fullscreen">Full screen</button></div><p class="under-controls">Drag Earth to rotate · scroll or pinch to zoom · tap Earth to play a note<br>Values are creative levels, 0–100; they are not live NASA measurements. Flowing strands interpret Earth processes.</p></section>
+<aside class="dash" id="dash" aria-label="What is happening on Earth"><div class="dash-top"><div><div class="eyebrow">Live dashboard</div><h2>What's happening</h2></div><button id="dash-toggle" aria-expanded="true">Hide</button></div><div class="dlast" id="dash-last"><div class="eyebrow">Last change</div><div class="dtitle">Nothing yet</div><p>Move any slider on the right. This box tells you, in plain words, what changes on Earth and in the music.</p></div><div class="drows" id="dash-rows"></div><p class="dfoot">Bars are creative levels, 0–100. Drag Earth to rotate it. Tap Earth to play a note.</p></aside>
+<div class="hint">Drag to orbit · tap Earth to play a note<br>Original NASA imagery and explanations: “NASA sources”</div>
+<div id="feedback" class="live"></div><div id="announcement" class="sr" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="launch" id="launch"><h2>Play the Earth.</h2><p>Every control you move sends its notes to Earth.<br>Your controls compose the music.</p><button class="play" id="start">▶ Play music</button></div>
+<footer class="dock" id="dock"><button class="play" id="play" aria-pressed="false" aria-label="Play music">▶</button>
+ <div class="now"><div class="eyebrow" id="music-state">Ready to play</div><div class="title" id="scene-name">Living Earth</div><div class="sub" id="score-state">Eight variables · four musical voices</div></div>
+ <div class="cap" id="caption-wrap">Caption · <b id="caption">Press play, then move a variable to hear what it does.</b></div>
+ <label class="volume" for="volume"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/></svg><span class="sr">Volume</span><input id="volume" type="range" min="0" max="100" value="65" aria-valuetext="65 percent"></label>
+ <div class="meter" id="meter" aria-hidden="true"></div></footer>
+<dialog id="source-dialog" aria-labelledby="source-title"><div class="dialog-head"><div><div class="eyebrow">The science behind the experience</div><h2 id="source-title">NASA source collection</h2></div><button id="close-sources">Close</button></div><p>This draft adapts the glowing, flowing-strand interaction shown in your recording to Earth. The globe uses NASA Blue Marble and Black Marble imagery (from the open-source three-globe example set) embedded in this file. The strands, surface effects, Moon and music are creative interpretations, not live NASA measurements. The original NASA visuals below retain their scientific context. The music is generated from your controls, not extracted from NASA datasets.</p><div class="source-grid" id="source-grid"></div><p class="source-foot">Collection: <a href="https://svs.gsfc.nasa.gov/gallery/earth-information-center/" target="_blank" rel="noopener">NASA Earth Information Center</a>. Original media needs an internet connection. The interactive scene and its music run locally.</p></dialog>
+<!--SCRIPTS-->
+</body></html>
