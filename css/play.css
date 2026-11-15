@@ -1,0 +1,106 @@
+/* MATCH THE MELODY (Play tab). Uses the colors, spacing and fonts from css/styles.css. */
+
+.mm { display: grid; gap: var(--space-6); padding: var(--space-6); border: 1px solid var(--line); background: var(--scrim); }
+.mm-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); }
+.mm-bar__opts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.mm-status { min-height: 3.25rem; padding: var(--space-4) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--ink-bright); font-size: 1.125rem; }
+.mm-caption a, .mm-ctl a, .mm-tctl a { color: var(--neon); }
+.mm-actions { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+
+/* ---------- start screen: three big buttons ---------- */
+.mm-start { display: grid; gap: var(--space-6); }
+.mm-start__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.mm-start .ob-btn--xl { flex-direction: column; align-items: flex-start; justify-content: center; gap: var(--space-2); min-height: 9rem; text-align: left; }
+
+/* ---------- the custom slide bar (keyboard, mouse and touch) ---------- */
+.mm-slider { position: relative; cursor: pointer; touch-action: none; user-select: none; border-radius: var(--radius-sm); --v: 0.5; }
+.mm-slider__track { position: absolute; background: var(--line-strong); border-radius: var(--radius-pill); }
+.mm-slider__fill { position: absolute; background: var(--neon); border-radius: var(--radius-pill); box-shadow: 0 0 10px var(--neon); }
+.mm-slider__handle { position: absolute; border: 1px solid var(--neon); border-radius: 50%; background: var(--bg-000); box-shadow: 0 0 16px rgba(76, 201, 255, 0.55), var(--glow-sm); }
+
+/* thin and horizontal: Keyboard and mouse */
+.mm-slider--h { height: var(--target-min); }
+.mm-slider--h .mm-slider__track { left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; }
+.mm-slider--h .mm-slider__fill { left: 0; top: 0; bottom: 0; width: calc(var(--v) * 100%); }
+.mm-slider--h .mm-slider__handle { top: 50%; left: calc(var(--v) * 100%); width: 16px; height: 16px; transform: translate(-50%, -50%); }
+
+/* large and vertical: Touch (the touch target is 72px wide, more than the 56px minimum) */
+.mm-slider--v { width: 4.5rem; height: 16rem; }
+.mm-slider--v .mm-slider__track { top: 0; bottom: 0; left: 50%; width: 4px; margin-left: -2px; }
+.mm-slider--v .mm-slider__fill { left: 0; right: 0; bottom: 0; height: calc(var(--v) * 100%); }
+.mm-slider--v .mm-slider__handle { left: 50%; bottom: calc(var(--v) * 100%); width: 36px; height: 36px; transform: translate(-50%, 50%); }
+
+/* ---------- Keyboard and mouse ---------- */
+.mm-keys { display: grid; gap: var(--space-8); }
+.mm-sliders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8) var(--space-12); }
+.mm-ctl { display: grid; gap: var(--space-1); }
+.mm-ctl__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-3); }
+.mm-ctl__ends { display: flex; justify-content: space-between; gap: var(--space-4); }
+
+/* ---------- Touch ---------- */
+.mm-touch { display: grid; gap: var(--space-8); }
+.mm-touch__sliders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+.mm-tctl { display: grid; justify-items: center; gap: var(--space-2); text-align: center; }
+.mm-tctl__name { font-family: var(--font-serif); font-size: 1.25rem; color: var(--ink-bright); }
+.mm-btn--touch { flex: 1 1 12rem; min-height: 4.5rem; font-size: 1.125rem; }
+
+/* ---------- Camera ---------- */
+.mm-cam { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+.mm-cam__view { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid var(--line); background: var(--bg-100); }
+.mm-cam__view video, .mm-cam__view canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mm-cam__view video { object-fit: cover; transform: scaleX(-1); }      /* mirrored, like a mirror */
+.mm-cam__badge { position: absolute; top: var(--space-3); left: var(--space-3); margin: 0; padding: var(--space-1) var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--scrim); color: var(--ink-bright); font-size: 0.75rem; letter-spacing: 0.06em; }
+.mm-cam__msg { position: absolute; left: 0; right: 0; top: var(--space-12); margin: 0; padding: 0 var(--space-4); color: var(--ink-bright); font-size: 1.25rem; text-align: center; text-shadow: 0 0 8px var(--bg-000), 0 0 2px var(--bg-000); }
+.mm-cam__side { display: grid; gap: var(--space-6); }
+.mm-cam__side .mm-actions .ob-btn { flex: 1 1 100%; }
+.mm-legend { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding-left: 1.1em; }
+.mm-meters { display: grid; gap: var(--space-3); }
+.mm-meter { display: grid; gap: var(--space-1); }
+.mm-meter__bar { position: relative; height: 2px; background: var(--line-strong); }
+.mm-meter__bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 50%; background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+
+/* ---------- result ---------- */
+.mm-result { display: grid; gap: var(--space-4); }
+.mm-result__big { display: flex; align-items: baseline; gap: var(--space-4); margin: 0; font-family: var(--font-serif); font-size: 2.5rem; font-weight: 300; color: var(--neon); }
+.mm-score { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.mm-score li { display: grid; grid-template-columns: 7rem minmax(4rem, 1fr) 2.5rem minmax(0, 2fr); align-items: center; gap: var(--space-4); }
+.mm-score__bar { position: relative; height: 2px; background: var(--line-strong); }
+.mm-score__bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--neon); }
+.mm-score__num { color: var(--ink-bright); text-align: right; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 860px) {
+  .mm { padding: var(--space-4); }
+  .mm-start__grid, .mm-sliders, .mm-cam { grid-template-columns: minmax(0, 1fr); }
+  .mm-score li { grid-template-columns: 6rem minmax(0, 1fr) 2.5rem; }
+  .mm-score li .ob-small { grid-column: 1 / -1; }
+  .mm-slider--v { width: 3.5rem; }
+}
+
+/* The game box grows with the game instead of staying 16:9. */
+.ob-ph--stage.is-mounted { aspect-ratio: auto; background: none; }
+
+/* ---------- How to play card ---------- */
+.mm-how { padding: var(--space-8); border: 1px solid var(--neon); border-radius: var(--radius-md); background: var(--panel); box-shadow: var(--glow-sm); }
+.mm-how__title { margin: 0 0 var(--space-4); font-family: var(--font-serif); font-size: 2rem; font-weight: 300; color: var(--ink-bright); }
+.mm-how__steps { display: grid; gap: var(--space-3); margin: 0; padding-left: 1.4em; color: var(--ink-bright); font-size: 1.375rem; line-height: 1.4; }
+.mm-how__steps li::marker { color: var(--neon); font-weight: 600; }
+.mm-how__mode { margin: var(--space-6) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--line-strong); color: var(--ink-bright); font-size: 1.125rem; }
+.mm-startbtn { justify-self: start; min-width: 14rem; min-height: 4.5rem; font-size: 1.5rem; }
+.mm-startbtn[hidden], .mm-how[hidden] { display: none; }
+.mm-why summary { display: inline-block; min-height: var(--target-min); line-height: var(--target-min); color: var(--neon); text-decoration: underline; cursor: pointer; }
+.mm-ctl__var { margin: 0; }
+@media (max-width: 860px) { .mm-how { padding: var(--space-6) var(--space-4); } .mm-how__steps { font-size: 1.1875rem; } .mm-startbtn { width: 100%; } }
+.mm [hidden] { display: none !important; }
+
+/* ---------- gesture legend and practice ---------- */
+.mm-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-4); padding: 0; list-style: none; }
+.mm-legend li { display: flex; align-items: center; gap: var(--space-2); color: var(--ink); }
+.mm-legend svg { flex: none; color: var(--neon); }
+.mm-legend strong { display: block; color: var(--ink-bright); font-weight: 400; }
+.mm-practice { position: absolute; right: var(--space-3); bottom: var(--space-3); display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--scrim); }
+.mm-practice ul { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; color: var(--ink-muted); font-size: 0.8125rem; }
+.mm-practice li::before { content: "\25CB\00a0"; color: var(--line-strong); }
+.mm-practice li.is-now { color: var(--ink-bright); }
+.mm-practice li.is-done { color: var(--neon); }
+.mm-practice li.is-done::before { content: "\2713\00a0"; color: var(--neon); }

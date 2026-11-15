@@ -1,0 +1,138 @@
+/* COMPOSE TAB (Planet Opera). Uses the colors, spacing and fonts from css/styles.css.
+   Everything is scoped under .po so nothing leaks into the rest of the site. */
+
+.ob-page--lab { padding-top: 0; padding-bottom: 0; }   /* on this page the header sits above the lab, not over it */
+.ob-page--lab .ob-section__head { margin-bottom: var(--space-4); max-width: none; }
+.ob-page--lab .ob-h1 { font-size: 2.125rem; }
+.ob-page--lab .ob-lead { font-size: 1rem; margin-top: var(--space-2); }
+.ob-mount--lab { min-height: 0; }
+
+/* the stage: the Earth fills it; the dashboard sits on the left and the controls on the right */
+.po { position: relative; height: max(26rem, calc(100svh - 7.75rem - var(--ob-player-h, var(--bar-h))));   /* the whole lab fits on one screen, no scrolling needed */ overflow: hidden; background: var(--bg-000); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.po:fullscreen { height: 100vh; }
+.po__canvas { position: absolute; inset: 0; }
+.po canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; background: var(--bg-000); }
+.po canvas:active { cursor: grabbing; }
+.po #labels-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+
+/* panels */
+.po-panel, .po-dash { position: absolute; top: var(--space-3); bottom: var(--space-3); z-index: 3; padding: var(--space-4); overflow: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.po-panel { right: var(--space-4); width: 22rem; max-width: 40vw; min-width: 20rem; }
+.po-dash { left: var(--space-4); width: 18.5rem; }
+.po-dash.closed { bottom: auto; height: auto; overflow: hidden; }
+.po-dash.closed .dlast, .po-dash.closed .drows, .po-dash.closed .dfoot { display: none; }
+
+.po h2 { margin: 0; color: var(--ink-bright); }
+.po p { margin: 0; }
+.po .ob-label { color: var(--ink-muted); }
+.po-title { margin: var(--space-4) 0 var(--space-2); }
+.po-transport { display: flex; align-items: center; gap: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+.po-transport .ob-caption { color: var(--ink-muted); }
+.po #music-state.audio-error { color: var(--amber); }
+
+/* form controls */
+.po select { width: 100%; min-height: var(--target-min); margin-bottom: var(--space-2); padding: 0 var(--space-3); color: var(--ink); background: var(--bg-100); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font: inherit; font-size: 0.875rem; }
+.po .ob-btn { padding: 0 var(--space-3); font-size: 0.8125rem; }
+.po .ob-btn--lg { padding: 0 var(--space-8); font-size: 1rem; }
+.po .ob-btn[aria-pressed="true"].tog { border-color: var(--neon); color: var(--neon); }
+.po-panel #chapter-note { min-height: 3.25rem; margin: var(--space-1) 0 var(--space-3); color: var(--ink); }
+
+.po .variables { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3) var(--space-4); padding: var(--space-4) 0; border-top: 1px solid var(--line); }
+.po .control { padding: 2px 0; border-radius: var(--radius-md); transition: background 0.3s; }
+.po .control label { display: flex; justify-content: space-between; gap: var(--space-1); font-size: 0.75rem; font-weight: 600; color: var(--ink-bright); }
+.po .control output { color: var(--c); font-weight: 500; font-variant-numeric: tabular-nums; }
+.po .control .voice-name { margin-top: var(--space-1); font-size: 0.6875rem; color: var(--c); }
+.po .control input { display: block; width: 100%; height: var(--target-min); margin: 0; accent-color: var(--c); cursor: pointer; }
+.po .control.fire { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--c) 22%, transparent)); }
+.po .control.fire output { text-shadow: 0 0 10px var(--c); }
+
+.po .layer-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.po .layer-list label { display: flex; align-items: center; gap: var(--space-2); min-height: var(--target-min); font-size: 0.75rem; cursor: pointer; }
+.po .layer-list input { width: 1rem; height: 1rem; accent-color: var(--neon); }
+.po .visual-controls { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.po .under-controls { margin-top: var(--space-3); color: var(--ink-muted); }
+
+/* launch card, over the Earth */
+.po-launch { position: absolute; left: calc((100% - 22rem) / 2); bottom: var(--space-8); z-index: 3; display: grid; gap: var(--space-3); justify-items: center; min-width: 16rem; padding: var(--space-4) var(--space-8); transform: translateX(-50%); text-align: center; background: var(--scrim); border: 1px solid var(--line-strong); border-radius: var(--radius-md); }
+.po-launch[hidden] { display: none; }
+.po-launch p { color: var(--ink-muted); }
+
+/* dashboard */
+.po .dash-top { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); }
+.po .dash-top .ob-btn { min-height: 2rem; font-size: 0.75rem; }
+.po .dash-top h2 { margin: var(--space-1) 0 var(--space-3); }
+.po .dlast { --c: var(--neon); margin-bottom: var(--space-3); padding: var(--space-2) var(--space-3); border-left: 3px solid var(--c); border-radius: 0 var(--radius-md) var(--radius-md) 0; background: var(--bg-100); }
+.po .dlast .eyebrow, .po .dlast .ob-label { color: var(--c); font-size: 0.625rem; }
+.po .eyebrow { font-size: 0.625rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.po .dtitle { margin: var(--space-1) 0 var(--space-2); font-size: 0.875rem; font-weight: 600; line-height: 1.35; color: var(--ink-bright); }
+.po .dtitle .up { color: #7fe3a5; font-size: 0.6875rem; white-space: nowrap; }
+.po .dtitle .down { color: #ffb27a; font-size: 0.6875rem; white-space: nowrap; }
+.po .dlast p { margin: var(--space-1) 0; font-size: 0.75rem; line-height: 1.5; color: var(--ink); }
+.po .dlast p b { color: var(--c); font-weight: 600; }
+.po .drow { padding: var(--space-2); border: 1px solid transparent; border-radius: var(--radius-md); transition: background 0.3s, border-color 0.3s; }
+.po .drow.changed { background: color-mix(in srgb, var(--c) 14%, transparent); border-color: color-mix(in srgb, var(--c) 55%, transparent); }
+.po .dhead { display: flex; align-items: center; gap: var(--space-2); font-size: 0.75rem; }
+.po .dhead b { flex: 1; font-weight: 600; color: var(--c); }
+.po .dlvl { font-size: 0.6875rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.po .dchip { display: none; padding: 1px 7px; border-radius: 9px; font-size: 0.625rem; font-weight: 700; color: var(--on-neon); background: var(--c); }
+.po .dchip.show { display: inline-block; }
+.po .dbar { height: 5px; margin: 5px 0; border-radius: 3px; background: var(--depth); }
+.po .dbar i { display: block; width: 0; height: 100%; border-radius: 3px; background: var(--c); transition: width 0.25s; }
+.po .dsee { font-size: 0.6875rem; line-height: 1.4; color: var(--ink-muted); }
+.po .dfoot { margin-top: var(--space-3); font-size: 0.6875rem; line-height: 1.5; color: var(--ink-muted); }
+
+/* region labels on the Earth */
+.po .rlabel { position: absolute; left: 0; top: 0; padding: 5px 10px 5px 8px; font-size: 0.6875rem; white-space: nowrap; color: var(--ink-bright); background: var(--scrim); border: 1px solid var(--line-strong); border-radius: var(--radius-md); will-change: transform, opacity; transition: border-color 0.2s, box-shadow 0.2s; }
+.po .rlabel i { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.po .rlabel.hit { border-color: var(--c); box-shadow: 0 0 16px var(--c); }
+.po .rlabel.changed { z-index: 2; font-weight: 600; border-color: var(--c); box-shadow: 0 0 22px var(--c); }
+
+/* NASA sources dialog */
+.po dialog { width: calc(100% - 2rem); max-width: 53rem; max-height: 88vh; padding: var(--space-6); color: var(--ink-bright); background: var(--bg-100); border: 1px solid var(--line-strong); border-radius: var(--radius-md); }
+.po dialog::backdrop { background: var(--veil); backdrop-filter: blur(5px); }
+.po dialog p { margin-top: var(--space-3); font-size: 0.8125rem; line-height: 1.7; color: var(--ink); }
+.po .dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4); }
+.po .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-4); }
+.po .source-card { padding: var(--space-3); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.po .source-card h3 { margin: 0 0 var(--space-2); font-size: 0.8125rem; color: var(--ink-bright); }
+.po .source-card p { margin: var(--space-1) 0 var(--space-2); font-size: 0.75rem; }
+.po .source-card img { display: block; width: 100%; height: 130px; margin: var(--space-3) 0; object-fit: contain; background: var(--bg-000); border-radius: var(--radius-sm); }
+.po .source-card a, .po .source-foot a { color: var(--neon); font-size: 0.75rem; }
+.po .source-card summary { font-size: 0.75rem; color: var(--cyan); cursor: pointer; }
+.po .source-card small { display: block; margin-top: var(--space-2); font-size: 0.6875rem; line-height: 1.5; color: var(--ink-muted); }
+.po .source-foot { font-size: 0.75rem; color: var(--ink-muted); }
+
+/* narrower screens */
+@media (max-width: 1099px) { .po-dash { width: 16rem; left: var(--space-3); } .po-panel { right: var(--space-3); } }
+@media (max-width: 1049px) { .po-launch { left: calc((100% - 20rem) / 2); } .po-panel { min-width: 18rem; } }
+
+/* phone: the Earth on top, then the controls, then the dashboard */
+@media (max-width: 760px) {
+  .ob-page--lab { padding-top: 0; }
+  .po { display: flex; flex-direction: column; height: auto; overflow: visible; }
+  .po:fullscreen { height: 100vh; overflow: auto; }
+  .po__canvas { position: relative; inset: auto; height: 62svh; min-height: 22rem; }
+  .po-panel { order: 1; }
+  .po-dash { order: 2; }
+  .po-launch { left: 50%; bottom: var(--space-4); max-width: calc(100% - 2rem); padding: var(--space-3) var(--space-4); }
+  .po-panel, .po-dash { position: static; width: auto; min-width: 0; max-width: none; margin: var(--space-3); overflow: visible; backdrop-filter: none; }
+  .po-dash.closed { margin-bottom: var(--space-3); }
+  .po .variables { grid-template-columns: repeat(2, 1fr); }
+  .po .source-grid { grid-template-columns: 1fr; }
+  .po .source-card img { height: 160px; }
+}
+@media (max-width: 400px) { .po .visual-controls, .po .layer-list { grid-template-columns: 1fr; } }
+
+/* Reduce motion: the page's own switch, or the site's */
+.po.motion-off .control, .po.motion-off .drow, .po.motion-off .dbar i, .po.motion-off .rlabel { transition: none; }
+@media (prefers-reduced-motion: reduce) { .po * { transition: none !important; } }
+
+/* Scrolling fix. On some graphics cards, see-through boxes over the 3D canvas left ghost copies behind while the page
+   scrolled. Every layer on this page now has a solid background, and the canvas and the launch box get their own layer. */
+html, body { background: var(--bg-000); }
+.ob-page--lab, .ob-boardwrap { background: var(--bg-000); }
+.ob-boardwrap { position: relative; z-index: 1; }
+.po { isolation: isolate; }
+.po canvas { will-change: transform; }
+.po-launch { background: var(--panel); will-change: transform; }
+.po .rlabel { background: var(--panel); }

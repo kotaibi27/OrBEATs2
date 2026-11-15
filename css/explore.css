@@ -1,0 +1,144 @@
+/* ORBEATS Explore page only. Loaded by index.html after css/styles.css.
+ *
+ * Everything here uses the site's own tokens (colors, spaces, fonts), so the
+ * teammate's experiences look like the rest of the site. Nothing outside the
+ * Explore page is styled here.
+ *
+ *   1. Viewer additions      view buttons, full display, time, error, sound label
+ *   2. Catalog additions     pictures, format filter, open button
+ *   3. Sound guide table
+ *   4. Ocean experience      her css/ocean-experience.css, re-themed
+ *   5. Aerosol sound map     the styles from her aerosol page, re-themed
+ *   6. Footer credit
+ */
+
+/* ---------- 1. viewer ---------- */
+.ex-main { min-width: 0; }
+.ex-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+.ex-views { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.ex-tools [data-ex-fullscreen] { margin-left: auto; }
+.ex-views .ob-btn[aria-pressed="true"], .ex-filter[aria-pressed="true"], .ex-aero .ob-btn[aria-pressed="true"] { border-color: var(--neon); color: var(--neon); background: var(--neon-dim); }
+.ob-stage video { cursor: pointer; background: var(--bg-000); }
+/* While the video plays, the big button steps aside; it comes back on keyboard focus. */
+.ob-stage.is-playing .ob-play--lg:not(:focus-visible) { opacity: 0; }
+.ex-time { flex: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ex-error { padding: var(--space-4); border: 1px solid var(--amber); border-top: 0; color: var(--ink-bright); }
+.ex-sound { color: var(--ink); padding-left: var(--space-3); border-left: 2px solid var(--neon); }
+.ob-hearing dd { color: var(--ink); font-size: 0.9375rem; line-height: 1.6; }
+.ex-read { justify-self: start; }
+.ex-read[aria-pressed="true"] { border-color: var(--neon); color: var(--neon); background: var(--neon-dim); }
+.ex-links { display: flex; flex-wrap: wrap; gap: 0 var(--space-8); margin-top: var(--space-8); }
+[data-ob-now]:focus-visible { outline-offset: 6px; }
+
+/* Full display: the viewer column fills the screen; Escape returns. */
+.ex-main:fullscreen { background: var(--bg-000); padding: var(--space-6); overflow: auto; }
+.ex-main:fullscreen .ob-stage { aspect-ratio: auto; height: calc(100vh - 16rem); }
+
+/* ---------- 2. catalog ---------- */
+.ex-filters { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.ex-results { margin: var(--space-4) 0 var(--space-6); }
+.ex-row { align-items: start; }
+.ex-thumb { display: block; width: 6rem; height: 4rem; border: 1px solid var(--line); background: var(--bg-100); overflow: hidden; }
+.ex-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ex-open { justify-self: start; margin-top: var(--space-2); padding: 0 var(--space-3); border-color: var(--line-strong); color: var(--neon); }
+.ex-row .ob-play { align-self: center; }
+@media (max-width: 900px) { .ex-thumb { display: none; } }
+
+/* ---------- 3. sound guide table ---------- */
+.ex-guide-box { margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--line); max-width: 46rem; }
+.ex-guide { width: 100%; margin-top: var(--space-4); border-collapse: collapse; text-align: left; font-size: 0.9375rem; }
+.ex-guide caption { text-align: left; padding-bottom: var(--space-2); color: var(--ink-muted); font-size: 0.6875rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.ex-guide th { padding: var(--space-2); color: var(--ink-bright); font-weight: 500; }
+.ex-guide td { padding: var(--space-2); border-top: 1px solid var(--line); }
+
+/* ---------- 4. ocean experience ---------- */
+.ex-ocean {
+  --muted: var(--ink-muted);        /* her script reads --line, --muted and --sea to draw the graph */
+  --sea: var(--neon);
+  color: var(--ink);
+  text-align: left;
+}
+.ex-ocean .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(230px, 280px); gap: var(--space-6); }
+.ex-ocean .viewer, .ex-ocean .settings, .ex-ocean .chartwrap { min-width: 0; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
+.ex-ocean .stage { position: relative; aspect-ratio: 16 / 9; background: #000; }
+.ex-ocean video { display: block; width: 100%; height: 100%; object-fit: contain; }
+.ex-ocean #ocean-overlay { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.ex-ocean .hint { margin: 0; padding: var(--space-3) var(--space-4); color: var(--ink-muted); font-size: 0.8125rem; border-top: 1px solid var(--line); }
+.ex-ocean .transport { padding: var(--space-4); }
+.ex-ocean .buttons, .ex-ocean .timebar { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.ex-ocean button:disabled { cursor: wait; }
+.ex-ocean .timebar { flex-wrap: nowrap; margin-top: var(--space-4); font-variant-numeric: tabular-nums; font-size: 0.875rem; }
+.ex-ocean input[type=range] { accent-color: var(--neon); min-width: 0; width: 100%; min-height: var(--target-min, 44px); }
+.ex-ocean #ocean-seek { flex: 1; }
+.ex-ocean label { display: block; color: var(--ink-muted); font-size: 0.875rem; }
+.ex-ocean label.check { display: flex; align-items: center; gap: var(--space-2); color: var(--ink); min-height: var(--target-min, 44px); }
+.ex-ocean input[type=checkbox] { width: 1.25rem; height: 1.25rem; accent-color: var(--neon); }
+.ex-ocean .settings { padding: var(--space-6); }
+.ex-ocean h3 { font-family: var(--font-sans); font-weight: 500; font-size: 1.0625rem; margin: 0 0 var(--space-3); color: var(--ink-bright); }
+.ex-ocean select, .ex-ocean .coords input { font: inherit; color: var(--ink-bright); background: var(--bg-000); border: 1px solid var(--line-strong); border-radius: var(--radius-sm, 2px); width: 100%; padding: var(--space-3); }
+.ex-ocean select { margin: var(--space-2) 0 var(--space-4); min-height: var(--target-min, 44px); }
+.ex-ocean .reading { padding: var(--space-4) 0; border-block: 1px solid var(--line); margin-bottom: var(--space-4); }
+.ex-ocean .reading strong { display: block; font-family: var(--font-serif); font-size: 2.125rem; font-weight: 300; color: var(--neon); font-variant-numeric: tabular-nums; }
+.ex-ocean .small { font-size: 0.8125rem; color: var(--ink-muted); line-height: 1.6; }
+.ex-ocean #ocean-status { min-height: 2.5rem; font-size: 0.875rem; margin: var(--space-3) 0; color: var(--ink-bright); }
+.ex-ocean .coords { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin: var(--space-3) 0; }
+.ex-ocean .coords input { margin-top: var(--space-1); }
+.ex-ocean details { margin-top: var(--space-4); }
+.ex-ocean summary { cursor: pointer; font-size: 0.875rem; min-height: var(--target-min, 44px); display: flex; align-items: center; }
+.ex-ocean #ocean-apply { width: 100%; }
+.ex-ocean .chartwrap { margin-top: var(--space-6); padding: var(--space-4) var(--space-6); }
+.ex-ocean .charthead { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: var(--space-3); }
+.ex-ocean .charthead h3 { margin: 0; }
+.ex-ocean #ocean-graph { display: block; width: 100%; height: 220px; margin-top: var(--space-3); }
+.ex-ocean .legend { display: flex; align-items: center; gap: var(--space-2); font-size: 0.8125rem; color: var(--ink-muted); }
+.ex-ocean .swatch { background: var(--neon); width: 22px; height: 3px; display: inline-block; }
+.ex-ocean .explain { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-6); font-size: 0.875rem; color: var(--ink-muted); line-height: 1.7; }
+.ex-ocean .explain strong { color: var(--ink-bright); font-weight: 500; }
+@media (max-width: 1100px) {
+  .ex-ocean .layout { grid-template-columns: 1fr; }
+  .ex-ocean .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--space-6); }
+  .ex-ocean .settings h3 { grid-column: 1 / -1; }
+  .ex-ocean .settings details { margin-top: 0; }
+}
+@media (max-width: 540px) {
+  .ex-ocean .settings, .ex-ocean .explain { display: block; }
+  .ex-ocean .chartwrap { padding: var(--space-3) var(--space-2); }
+  .ex-ocean .transport { padding: var(--space-3); }
+}
+
+/* ---------- 5. aerosol sound map ---------- */
+.ex-aero { color: var(--ink); }
+.ex-aero > p { color: var(--ink-muted); margin: var(--space-2) 0; }
+.ex-aero h3 { margin: var(--space-1) 0 var(--space-3); }
+.ex-aero .controls { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin: var(--space-6) 0 var(--space-4); }
+.ex-aero label { display: flex; align-items: center; gap: var(--space-2); min-height: var(--target-min, 44px); }
+.ex-aero input[type=range] { accent-color: var(--neon); max-width: 130px; min-height: var(--target-min, 44px); }
+.ex-aero .status { font-size: 0.8125rem; color: var(--ink-muted); }
+.ex-aero .map { position: relative; aspect-ratio: 16 / 9; border: 1px solid var(--line); overflow: hidden; background: #020702; touch-action: none; cursor: crosshair; }
+.ex-aero .map:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.ex-aero .map img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
+.ex-aero .marker { position: absolute; width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 0 2px #0009; pointer-events: none; }
+.ex-aero .marker::before, .ex-aero .marker::after { content: ''; position: absolute; background: white; }
+.ex-aero .marker::before { width: 1px; height: 32px; left: 10px; top: -6px; }
+.ex-aero .marker::after { width: 32px; height: 1px; left: -6px; top: 10px; }
+.ex-aero .hint { font-size: 0.8125rem; margin: var(--space-3) 0 var(--space-4); }
+.ex-aero .selection { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin: var(--space-4) 0; font-size: 0.9375rem; color: var(--ink-bright); }
+.ex-aero .sounds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+.ex-aero .sound { background: var(--panel); border: 1px solid var(--line); padding: var(--space-4); }
+.ex-aero .soundhead { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.ex-aero .chip { width: 13px; height: 13px; display: inline-block; border-radius: 3px; background: var(--color); }
+.ex-aero .sound label { font-weight: 500; font-size: 0.9375rem; color: var(--ink-bright); }
+.ex-aero .sound input { accent-color: var(--color); width: 1.25rem; height: 1.25rem; }
+.ex-aero .tone { font-size: 0.75rem; color: var(--ink-muted); margin: var(--space-1) 0 var(--space-3); }
+.ex-aero .meter { height: 6px; background: var(--line); overflow: hidden; }
+.ex-aero .fill { height: 100%; width: 0; background: var(--color); transition: width .1s linear; }
+.ex-aero .value { font-size: 0.8125rem; font-variant-numeric: tabular-nums; margin: var(--space-2) 0; color: var(--ink-muted); }
+.ex-aero .preview { padding: 0 var(--space-3); font-size: 0.8125rem; }
+.ex-aero .keyboard .ob-btn { min-width: var(--target-min, 44px); padding: 0 var(--space-2); }
+.ex-aero .note { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--line); font-size: 0.875rem; }
+.ex-aero .note strong { color: var(--ink-bright); font-weight: 500; }
+@media (max-width: 1100px) { .ex-aero .sounds { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- 6. footer credit ---------- */
+.ex-footer { position: relative; padding: var(--space-8) 0 var(--space-12); border-top: 1px solid var(--line); }
+.ex-footer p + p { margin-top: var(--space-2); }
