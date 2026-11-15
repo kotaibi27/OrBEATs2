@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en" data-theme="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORBEATS · Audio check</title>
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  body { padding: var(--space-8); }
+  h1 { margin-bottom: var(--space-4); }
+  .ac-intro { max-width: 52rem; margin-bottom: var(--space-6); }
+  table { width: 100%; border-collapse: collapse; margin-top: var(--space-6); font-size: 0.9375rem; }
+  th, td { padding: var(--space-3); border-top: 1px solid var(--line); text-align: left; vertical-align: middle; }
+  th { color: var(--ink-muted); font-weight: 400; }
+  .ac-meter { display: block; width: 10rem; height: 0.75rem; border: 1px solid var(--line-strong); }
+  .ac-meter i { display: block; height: 100%; width: 0; background: var(--neon); }
+  .ac-ok { color: var(--neon); }
+  .ac-bad { color: var(--amber); }
+  iframe { width: 100%; height: 26rem; margin-top: var(--space-8); border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<h1 class="ob-h1">Audio check</h1>
+<p class="ac-intro">This page opens the real Explore page below and plays each dataset through it, exactly as a visitor would.
+  It listens for 3 seconds with an AnalyserNode and says whether sound was detected (a video that is quiet at that moment is tried again at two later points). Press one Play button, or check them all.
+  Every Explore sound is Reem’s or NASA’s; the only other sound on the site is the Caldwell 73 music.</p>
+<button class="ob-btn ob-btn--primary" type="button" id="ac-all">Check all datasets</button>
+<p class="ob-caption" id="ac-summary" role="status" aria-live="polite"></p>
+<table>
+  <thead><tr><th scope="col">Dataset</th><th scope="col">Where the sound comes from</th><th scope="col">Play</th><th scope="col">Level</th><th scope="col">Status</th></tr></thead>
+  <tbody id="ac-rows"></tbody>
+</table>
+<iframe id="ac-site" src="index.html" title="The Explore page being checked"></iframe>
+
+<script>
+(function () {
+  'use strict';
+  var LISTEN_MS = 3000, THRESHOLD = 0.004;       // peak sample level that counts as sound
+  var frame = document.getElementById('ac-site'), rowsEl = document.getElementById('ac-rows');
+  var w = null, doc = null, tap = null, items = [], busy = false;
+  window.AUDIO_CHECK_RESULTS = null;
+
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function until(test, ms) {
+    var t0 = Date.now();
+    return new Promise(function (r) { (function poll() { if (test() || Date.now() - t0 > ms) r(!!test()); else setTimeout(poll, 100); })(); });
+  }
+  function click(sel) { var el = doc.querySelector(sel); if (el) el.click(); return !!el; }
+
+  /* One analyser for everything the Explore page can play: the video element, the
+   * Caldwell music element, and the shared Web Audio output (ocean, aerosols). */
+  function getTap() {
+    if (tap) return tap;
+    var a = w.ORBEATS.getAudio();
+    var ctx = a.context, an = ctx.createAnalyser();
+    an.fftSize = 2048;
+    a.output.connect(an);
+    [doc.querySelector('[data-ob-clip]'), doc.getElementById('site-music')].forEach(function (el) {
+      var src = ctx.createMediaElementSource(el);
+      src.connect(an); src.connect(ctx.destination);      // still heard as normal
+    });
+    tap = { ctx: ctx, an: an, buf: new Float32Array(an.fftSize) };
+    return tap;
+  }
+  function level() {
+    tap.an.getFloatTimeDomainData(tap.buf);
+    var peak = 0;
+    for (var i = 0; i < tap.buf.length; i++) { var v = Math.abs(tap.buf[i]); if (v > peak) peak = v; }
+    return peak;
+  }
+
+  function build() {
+    w = frame.contentWindow; doc = w.document;
+    items = [];
+    w.ORBEATS.datasets.forEach(function (d) {
+      var views = d.views || [null];
+      views.forEach(function (v, i) {
+        var has = !!(d.reference || d.interactive || (v || d).media);
+        items.push({ d: d, view: v ? i : -1, name: d.title + (v ? ' · ' + v.label : ''), has: has,
+          from: d.reference ? 'The Caldwell 73 music (NASA sonification)' : d.interactive ? 'Her Web Audio code (js/explore/' + d.interactive + '.js)' : has ? 'Audio track of her video' : 'none' });
+      });
+    });
+    rowsEl.innerHTML = items.map(function (it, n) {
+      return '<tr><td>SVS ' + it.d.id + ' · ' + it.name.replace(/</g, '&lt;') + '</td><td>' + it.from + '</td>' +
+        '<td><button class="ob-btn" type="button" data-n="' + n + '"' + (it.has ? '' : ' disabled') + ' aria-label="Play and check: ' + it.name.replace(/"/g, '&quot;') + '">Play</button></td>' +
+        '<td><span class="ac-meter" aria-hidden="true"><i></i></span></td>' +
+        '<td data-status>' + (it.has ? 'Not checked yet' : '[No sound provided for this dataset yet]') + '</td></tr>';
+    }).join('');
+  }
+
+  /* Play one dataset through the real page, listen for 3 seconds, report. */
+  async function run(n) {
+    var it = items[n], row = rowsEl.children[n], bar = row.querySelector('.ac-meter i'), status = row.querySelector('[data-status]');
+    if (!it.has) return 'none';
+    var d = it.d, O = w.ORBEATS, clip = doc.querySelector('[data-ob-clip]');
+    status.className = ''; status.textContent = 'Playing…';
+    getTap();
+    await tap.ctx.resume();
+    O.stopDataset();
+    if (!O.settings.audio) O.setAudio(true);
+
+    click('[data-ob-open="' + d.id + '"]');                                   // the catalog row's own button
+    if (it.view > 0) click('[data-ex-view="' + it.view + '"]');               // her view button
+    if (d.interactive === 'ocean') {
+      await until(function () { return !doc.querySelector('#ocean-play').disabled; }, 8000);
+      click('#ocean-play');
+      await until(function () { return doc.querySelector('#ocean-video').currentTime > 0.3; }, 8000);
+    } else if (d.interactive === 'aerosols') {
+      await until(function () { return !doc.querySelector('#aero-enable').disabled; }, 15000);
+      click('#aero-enable');
+      await wait(300);
+    } else if (!d.reference) {
+      await until(function () { return clip.currentTime > 0.2 && !clip.paused; }, 8000);
+      if (clip.duration) clip.currentTime = clip.duration * 0.25;             // skip a quiet opening
+      await wait(400);
+    } else await wait(600);
+
+    var peak = 0, t0 = Date.now(), tones = ['carbon', 'dust', 'salt', 'sulfate'], tone = -1, tries = 0;
+    var isVideo = !d.interactive && !d.reference;
+    while (Date.now() - t0 < LISTEN_MS) {
+      if (d.interactive === 'aerosols') {                                     // her four preview tones, one after the other
+        var k = Math.floor((Date.now() - t0) / (LISTEN_MS / 4));
+        if (k !== tone && k < 4) { tone = k; click('[data-tone="' + tones[k] + '"]'); }
+      }
+      var v = level();
+      if (v > peak) peak = v;
+      bar.style.width = Math.min(100, v * 250) + '%';
+      await wait(50);
+      /* Her tracks have quiet passages (lightning starts with silence). Still silent after 3 seconds: listen again further in. */
+      if (isVideo && Date.now() - t0 >= LISTEN_MS && peak <= THRESHOLD && tries < 2 && clip.duration) {
+        tries++; clip.currentTime = clip.duration * (0.25 + 0.25 * tries);
+        await wait(500); t0 = Date.now();
+      }
+    }
+    bar.style.width = '0';
+    if (d.interactive === 'ocean') click('#ocean-play');
+    if (d.interactive === 'aerosols') click('#aero-stop');
+    O.stopDataset();
+    var ok = peak > THRESHOLD;
+    status.className = ok ? 'ac-ok' : 'ac-bad';
+    status.textContent = (ok ? 'OK, sound detected' : 'silent') + ' (peak ' + peak.toFixed(3) + ')';
+    return { id: d.id, name: it.name, ok: ok, peak: +peak.toFixed(4) };
+  }
+
+  async function runAll() {
+    if (busy) return; busy = true;
+    var results = [];
+    for (var n = 0; n < items.length; n++) { var r = await run(n); if (r !== 'none') results.push(r); else results.push({ id: items[n].d.id, name: items[n].name, ok: false, none: true }); }
+    var ok = results.filter(function (r) { return r.ok; }).length;
+    document.getElementById('ac-summary').textContent = ok + ' of ' + results.length + ' play with sound.';
+    window.AUDIO_CHECK_RESULTS = results;
+    busy = false;
+  }
+
+  frame.addEventListener('load', function () {
+    build();
+    if (/[?&]auto\b/.test(location.search)) runAll();     // for an automatic run (needs a browser that allows autoplay)
+  });
+  document.getElementById('ac-all').addEventListener('click', runAll);
+  rowsEl.addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-n]'); if (!b || busy) return;
+    busy = true; try { await run(+b.getAttribute('data-n')); } finally { busy = false; }
+  });
+})();
+</script>
+</body>
+</html>

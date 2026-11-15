@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en" data-theme="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORBEATS · Explore</title>
+<meta name="description" content="ORBEATS, the Earth Information Jukebox. See and hear NASA Earth data.">
+<link rel="icon" href="assets/orbeats-mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/explore.css">
+</head>
+<body>
+<div class="ob-site">
+  <div data-ob-part="skip"></div>
+  <div data-ob-part="top" data-active="explore"></div>
+
+  <main id="content" tabindex="-1">
+
+    <!-- 1. Video hero -->
+    <section class="ob-hero" aria-labelledby="hero-title">
+      <div data-ob-part="backdrop"></div>
+      <div class="ob-wrap ob-hero__body">
+        <p class="ob-label">The Earth Information Jukebox</p>
+        <h1 class="ob-display ob-hero__mark" id="hero-title">ORBEATS</h1>
+        <p class="ob-lead">Our changing planet. Seen, heard, felt.</p>
+        <div class="ob-actions">
+          <button class="ob-btn ob-btn--primary ob-btn--lg" type="button" data-ob-action="music"><span data-ob-text>Tap to hear the music</span></button>
+          <a class="ob-btn ob-btn--lg" href="#data">Explore the data</a>
+        </div>
+        <p class="ob-caption ob-music__msg" data-ob-sound-msg role="status"></p>
+        <p class="ob-caption ob-hero__credit">Each star in this Hubble image becomes a note. Stars farther from the center sound higher.<br>
+          <a href="https://svs.gsfc.nasa.gov/13786/" target="_blank" rel="noopener">Video and sonification: NASA Scientific Visualization Studio, SVS 13786.</a> Sonification credit: SYSTEM Sounds (M. Russo, A. Santaguida).</p>
+      </div>
+    </section>
+
+    <!-- 2. Explore the data. All wording and dataset facts come from js/data.js (Reem's content);
+         the behavior is in js/explore.js and js/explore/. -->
+    <section class="ob-section" id="data" aria-labelledby="data-title">
+      <div class="ob-wrap">
+        <div class="ob-section__head">
+          <p class="ob-label">Explore the data</p>
+          <h2 class="ob-h1" id="data-title" data-ob-now tabindex="-1">[Dataset title]</h2>
+          <p class="ob-label" data-ex-kicker></p>
+        </div>
+        <div class="ob-viewer">
+          <div class="ex-main" data-ex-main>
+            <div class="ex-tools">
+              <div class="ex-views" role="group" aria-label="Choose forest view" data-ex-views hidden></div>
+              <button class="ob-btn ob-btn--quiet" type="button" data-ex-fullscreen>Fill display &#8599;</button>
+            </div>
+
+            <!-- A video experience: the NASA visualization with its soundtrack. -->
+            <div data-ex-player>
+              <div class="ob-stage">
+                <img data-ob-still alt="" decoding="async">
+                <video data-ob-clip playsinline preload="none" hidden></video>
+                <button class="ob-play ob-play--lg" type="button" aria-pressed="false" data-ob-play="selected" aria-label="Play the selected dataset"></button>
+              </div>
+              <p class="ex-error" data-ex-error role="status" hidden></p>
+              <div class="ob-ctl" role="group" aria-label="Viewer controls">
+                <button class="ob-play ob-play--sm" type="button" aria-pressed="false" data-ob-play="selected" aria-label="Play the selected dataset"></button>
+                <input class="ob-slider ob-ctl__scrub" type="range" min="0" max="1000" value="0" data-ob-scrub aria-label="Position in the video">
+                <span class="ob-caption ex-time" data-ex-time aria-hidden="true"></span>
+                <button class="ob-btn ob-btn--quiet" type="button" data-ob-speed aria-label="Playback speed: 1 times. Press to change.">1&times;</button>
+                <input class="ob-slider ob-ctl__vol" type="range" min="0" max="100" value="100" data-ob-dataset-volume aria-label="Dataset volume">
+                <span data-ob-part="switch" data-key="captions" data-label="Captions"></span>
+              </div>
+            </div>
+
+            <!-- Interactive ocean exploration (SVS 3912). Markup and wording by Reem; logic in js/explore/ocean.js. -->
+            <section class="ex-ocean" id="journey-ocean" data-ex-panel="ocean" aria-label="Interactive ocean exploration" hidden>
+              <div class="layout">
+                <section class="viewer" aria-label="Ocean video and playback">
+                  <div class="stage">
+                    <video id="ocean-video" playsinline muted preload="none" poster="media/explore/img/ocean-interactive.webp" data-src="media/explore/video/ocean-interactive.mp4"></video>
+                    <canvas id="ocean-overlay" width="960" height="540" aria-label="Draw a rectangle to select an ocean area. Alternatively, use the region menu or selection fields below."></canvas>
+                  </div>
+                  <p class="hint">Drag to select an area · Tap for a small selection · Presets and fields provide keyboard alternatives</p>
+                  <div class="transport">
+                    <div class="buttons">
+                      <button type="button" id="ocean-play" class="ob-btn ob-btn--primary">Load &amp; listen</button>
+                      <button class="ob-btn" type="button" id="ocean-restart">Replay</button>
+                      <label class="check"><input type="checkbox" id="ocean-sound" checked>Sound on</label>
+                      <label for="ocean-volume">Volume</label>
+                      <input id="ocean-volume" type="range" min="0" max="100" value="45" style="max-width:110px" aria-label="Sound volume">
+                    </div>
+                    <div class="timebar">
+                      <span id="ocean-elapsed">0:00</span>
+                      <input id="ocean-seek" type="range" min="0" max="40.8333" value="0" step="0.05" aria-label="Video timeline in seconds">
+                      <span id="ocean-duration">0:41</span>
+                    </div>
+                  </div>
+                </section>
+                <aside class="settings" aria-label="Selection and temperature">
+                  <h3>Your listening area</h3>
+                  <div>
+                    <label for="ocean-preset">Ocean region</label>
+                    <select id="ocean-preset">
+                      <option value="atlantic">North Atlantic</option>
+                      <option value="pacific">Equatorial Pacific</option>
+                      <option value="indian">Indian Ocean</option>
+                      <option value="southern">Southern Ocean</option>
+                      <option value="custom" disabled>Custom selection</option>
+                    </select>
+                    <div class="reading">
+                      <span class="small">Color-derived temperature estimate</span>
+                      <strong id="ocean-temp">— °C</strong>
+                      <span class="small" id="ocean-coverage">Waiting for video</span>
+                    </div>
+                    <label for="ocean-style">Sound style</label>
+                    <select id="ocean-style">
+                      <option value="musical" selected>Gentle harp &amp; chords</option>
+                      <option value="tone">Single tone — direct comparison</option>
+                    </select>
+                    <label for="ocean-speed">Playback speed</label>
+                    <select id="ocean-speed">
+                      <option value="0.5">0.5× — slow</option>
+                      <option value="1" selected>1× — normal</option>
+                      <option value="1.5">1.5× — fast</option>
+                    </select>
+                  </div>
+                  <div>
+                    <details>
+                      <summary>Adjust selection with fields</summary>
+                      <p class="small">Position and size as percentages of the video frame.</p>
+                      <div class="coords">
+                        <label>Left (%)<input id="ocean-rx" type="number" min="0" max="98" step="1"></label>
+                        <label>Top (%)<input id="ocean-ry" type="number" min="0" max="98" step="1"></label>
+                        <label>Width (%)<input id="ocean-rw" type="number" min="2" max="100" step="1"></label>
+                        <label>Height (%)<input id="ocean-rh" type="number" min="2" max="100" step="1"></label>
+                      </div>
+                      <button class="ob-btn" type="button" id="ocean-apply">Apply selection</button>
+                    </details>
+                    <p id="ocean-status" role="status" aria-live="polite">Choose a region, then press Play &amp; listen.</p>
+                    <p class="small">Land, dark background and uncolored pixels are excluded. Very small areas may have too few colored currents to estimate.</p>
+                  </div>
+                </aside>
+              </div>
+              <section class="chartwrap" aria-label="Selected area temperature trace">
+                <div class="charthead">
+                  <h3>Temperature trace</h3>
+                  <div class="legend"><span class="swatch"></span>Selected area · fixed 0–32 °C scale</div>
+                </div>
+                <canvas id="ocean-graph" role="img" aria-label="Temperature estimated from colored current pixels versus video time. The trace builds as you play."></canvas>
+                <p class="small">The trace builds during playback and resets when the area changes. Seeking leaves gaps rather than inventing measurements.</p>
+              </section>
+              <div class="explain">
+                <p><strong>How to listen</strong><br>Gentle harp-like arpeggios and soft chords follow the temperature. Warmer colors shift the whole harmony higher and slightly louder. The fixed temperature-to-root-pitch scale is the same for every region; the added musical intervals are artistic. Choose Single tone for the clearest direct comparison. No estimate means no new notes.</p>
+                <p><strong>What this measures</strong><br>The mean color-derived estimate of visible colored flow pixels in your box. It is not an area-weighted regional temperature, a measurement of current speed, or a live ocean reading. Red means warmer on this legend, not a danger alert; this visualization does not establish hazardous conditions.</p>
+              </div>
+              <p id="ocean-live" class="ob-sr" aria-live="polite"></p>
+            </section>
+
+            <!-- Interactive aerosol sound map (SVS 5669). Markup and wording by Reem; logic in js/explore/aerosols.js. -->
+            <section class="ex-aero" data-ex-panel="aerosols" aria-label="Interactive aerosol sound map" hidden>
+              <p class="ob-label">Explore aerosols through sound</p>
+              <h3 class="ob-h2">Four aerosols. Four distinct tones.</h3>
+              <p>Enable sound, then move across the image. More prominent colors produce louder matching tones.</p>
+              <div class="controls"><button id="aero-enable" class="ob-btn ob-btn--primary" type="button" disabled>Loading image…</button><button id="aero-stop" class="ob-btn" type="button">Stop sound</button><label for="aero-volume">Volume <input id="aero-volume" type="range" min="0" max="100" value="40"></label><span id="aero-status" class="status" role="status" aria-live="polite">Loading the supplied image.</span></div>
+              <div id="aero-map" class="map" tabindex="0" role="group" aria-label="Interactive aerosol map. Use arrow keys to move the listening point; Shift and arrow moves faster. Press Space to enable or stop sound. Touch and drag on mobile."><img id="aero-image" data-src="media/explore/img/geos-aerosols-map.webp" alt="Global aerosol visualization: black carbon in orange-red, dust in purple, sea salt in blue-gray, and sulfate in green."><span id="aero-marker" class="marker" aria-hidden="true" hidden></span></div>
+              <p class="hint">Mouse: hover to listen · Touch: drag to explore, lift to stop · Keyboard: focus the map and use arrow keys; Shift moves faster. Space toggles sound.</p>
+              <div class="selection"><span id="aero-reading">Choose a point on the image.</span><span id="aero-position" class="status">No point selected</span></div>
+              <div class="sounds">
+                <section class="sound" style="--color:#d55e43"><div class="soundhead"><span class="chip"></span><label><input type="checkbox" id="aero-carbon-on" checked>Black carbon</label></div><p class="tone">Low rounded bass · C3</p><div class="meter"><div id="aero-carbon-meter" class="fill"></div></div><p id="aero-carbon-value" class="value">Color strength: 0%</p><button class="ob-btn preview" type="button" data-tone="carbon" aria-label="Preview tone: Black carbon">Preview tone</button></section>
+                <section class="sound" style="--color:#bd9bd7"><div class="soundhead"><span class="chip"></span><label><input type="checkbox" id="aero-dust-on" checked>Dust</label></div><p class="tone">Soft reed-like tone · G3</p><div class="meter"><div id="aero-dust-meter" class="fill"></div></div><p id="aero-dust-value" class="value">Color strength: 0%</p><button class="ob-btn preview" type="button" data-tone="dust" aria-label="Preview tone: Dust">Preview tone</button></section>
+                <section class="sound" style="--color:#88acad"><div class="soundhead"><span class="chip"></span><label><input type="checkbox" id="aero-salt-on" checked>Sea salt</label></div><p class="tone">Clear airy tone · E4</p><div class="meter"><div id="aero-salt-meter" class="fill"></div></div><p id="aero-salt-value" class="value">Color strength: 0%</p><button class="ob-btn preview" type="button" data-tone="salt" aria-label="Preview tone: Sea salt">Preview tone</button></section>
+                <section class="sound" style="--color:#4ddd24"><div class="soundhead"><span class="chip"></span><label><input type="checkbox" id="aero-sulfate-on" checked>Sulfate</label></div><p class="tone">Bright shimmering tone · C5</p><div class="meter"><div id="aero-sulfate-meter" class="fill"></div></div><p id="aero-sulfate-value" class="value">Color strength: 0%</p><button class="ob-btn preview" type="button" data-tone="sulfate" aria-label="Preview tone: Sulfate">Preview tone</button></section>
+              </div>
+              <div class="controls keyboard" role="group" aria-label="Keyboard and button navigation"><span>Move listening point:</span><button id="aero-left" class="ob-btn" type="button" aria-label="Move left">←</button><button id="aero-up" class="ob-btn" type="button" aria-label="Move up">↑</button><button id="aero-down" class="ob-btn" type="button" aria-label="Move down">↓</button><button id="aero-right" class="ob-btn" type="button" aria-label="Move right">→</button></div>
+              <p class="note"><strong>How to interpret the sound:</strong> each tone represents a color category from your supplied legend. Loudness reflects relative color prominence in a small patch around the pointer. It is not a concentration measurement or a danger level. Overlapping colors can produce blended tones; pale or neutral pixels may be ambiguous. Dark, uncolored areas are quiet. Tone choices are artistic.</p>
+              <div id="aero-live" class="ob-sr" aria-live="polite"></div>
+            </section>
+
+            <p class="ob-caption-line" data-ob-caption="viewer" aria-live="polite"></p>
+            <div class="ob-viewer__meta">
+              <p class="ob-small" data-ob-desc></p>
+              <button class="ob-btn ex-read" type="button" data-ex-read aria-pressed="false">Read the description aloud</button>
+              <p class="ob-caption ex-sound" data-ex-sound></p>
+              <p class="ob-caption"><a class="ob-link" data-ob-src href="https://svs.gsfc.nasa.gov/gallery/earth-information-center/" target="_blank" rel="noopener">Read the original NASA science and credits &#8599;</a> &middot; <span data-ob-released></span></p>
+            </div>
+          </div>
+          <aside aria-labelledby="picker-title">
+            <h3 class="ob-label" id="picker-title">Datasets</h3>
+            <ul class="ob-picker" data-ob-picker></ul>
+          </aside>
+        </div>
+        <div class="ob-hearing">
+          <div class="ob-section__head"><h3 class="ob-label">What am I hearing? &middot; About this experience</h3></div>
+          <dl class="ob-cols ob-cols--3">
+            <div><dt class="ob-h3">What you are exploring</dt><dd data-ex-see></dd></div>
+            <div><dt class="ob-h3">Listening guide</dt><dd data-ex-listen></dd></div>
+            <div><dt class="ob-h3">Why it matters</dt><dd data-ex-why></dd></div>
+          </dl>
+          <div class="ex-guide-box" data-ex-guide hidden></div>
+          <p class="ob-caption ex-links"><a class="ob-link" data-ob-src href="https://svs.gsfc.nasa.gov/gallery/earth-information-center/" target="_blank" rel="noopener">Read the original NASA science and credits &#8599;</a>
+            <a class="ob-link" data-ex-transcript target="_blank" rel="noopener" hidden>Read NASA’s complete narration transcript &#8599;</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Who it is for -->
+    <section class="ob-section" aria-labelledby="who-title">
+      <div class="ob-wrap">
+        <div class="ob-section__head">
+          <p class="ob-label">Who it is for</p>
+          <h2 class="ob-h1" id="who-title">Science data should not need eyes.</h2>
+        </div>
+        <div class="ob-stats">
+          <div class="ob-stat">
+            <p class="ob-stat__num"><span data-ob-count="2.2" data-decimals="1">2.2</span> <span class="ob-stat__unit">billion</span></p>
+            <p>people live with a vision impairment</p>
+            <p class="ob-caption">Source: <a href="https://www.who.int/news-room/fact-sheets/detail/blindness-and-visual-impairment" target="_blank" rel="noopener">World Health Organization</a></p>
+          </div>
+          <div class="ob-stat">
+            <p class="ob-stat__num"><span data-ob-count="1.3" data-decimals="1">1.3</span> <span class="ob-stat__unit">billion</span></p>
+            <p>people, about 1 in 6, live with a significant disability</p>
+            <p class="ob-caption">Source: <a href="https://www.who.int/news-room/fact-sheets/detail/disability-and-health" target="_blank" rel="noopener">World Health Organization</a></p>
+          </div>
+          <div class="ob-stat">
+            <p class="ob-stat__num"><span data-ob-count="catalog">0</span></p>
+            <p>NASA Earth datasets in the catalog, plus one Hubble sonification as a reference</p>
+            <p class="ob-caption">Source: <a href="https://svs.gsfc.nasa.gov/gallery/earth-information-center/" target="_blank" rel="noopener">NASA Scientific Visualization Studio</a></p>
+          </div>
+        </div>
+        <p class="ob-small ob-note">The first two numbers describe people who could benefit. They are not a promise of reach.</p>
+      </div>
+    </section>
+
+    <!-- 4. Why it works -->
+    <section class="ob-section" aria-labelledby="why-title">
+      <div class="ob-wrap">
+        <div class="ob-section__head"><h2 class="ob-label" id="why-title">Why it works</h2></div>
+        <div class="ob-cols">
+          <div><h3 class="ob-h3">Everyone can use it</h3><p class="ob-ph-text">[Short text placeholder]</p></div>
+          <div><h3 class="ob-h3">Real NASA data</h3><p class="ob-ph-text">[Short text placeholder]</p></div>
+          <div><h3 class="ob-h3">Learn by playing</h3><p class="ob-ph-text">[Short text placeholder]</p></div>
+          <div><h3 class="ob-h3">Ready for a museum</h3><p class="ob-ph-text">[Short text placeholder]</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Data catalog. Heading, hint and filter in Reem's wording. -->
+    <section class="ob-section" id="catalog" aria-labelledby="catalog-title">
+      <div class="ob-wrap">
+        <div class="ob-section__head">
+          <p class="ob-label">Explore our living planet</p>
+          <h2 class="ob-h1" id="catalog-title">Where will you listen first?</h2>
+          <p>Enter an Earth story. Fill your screen with NASA imagery, press play, and experience its patterns through sound.</p>
+          <p class="ob-small">Headphones recommended · Playback controls available in every journey · Press Escape to return</p>
+          <p class="ob-small">Every entry is a real visualization from the <a href="https://svs.gsfc.nasa.gov/gallery/earth-information-center/" target="_blank" rel="noopener">NASA Scientific Visualization Studio</a>. Each entry says where its sound comes from.</p>
+        </div>
+        <div class="ex-filters" role="group" aria-label="Filter experiences by format">
+          <button type="button" class="ob-btn ex-filter" data-ex-filter="all" aria-pressed="true">All experiences</button>
+          <button type="button" class="ob-btn ex-filter" data-ex-filter="music" aria-pressed="false">Music &amp; sound</button>
+          <button type="button" class="ob-btn ex-filter" data-ex-filter="interactive" aria-pressed="false">Interactive</button>
+          <button type="button" class="ob-btn ex-filter" data-ex-filter="narrated" aria-pressed="false">Narrated</button>
+        </div>
+        <p class="ob-caption ex-results" data-ex-results role="status" aria-live="polite" aria-atomic="true"></p>
+        <ul class="ob-catalog" data-ob-catalog></ul>
+      </div>
+    </section>
+
+    <!-- 6. Her closing section. -->
+    <section class="ob-section" aria-labelledby="listen-title">
+      <div class="ob-wrap">
+        <div class="ob-section__head">
+          <p class="ob-label">A planet for every sense</p>
+          <h2 class="ob-h1" id="listen-title">Look closer. Listen differently.</h2>
+          <p>NASA’s Earth Information Center brings our changing planet into view. ORBEATS pairs those visual stories with sonification so visitors can explore through hearing as well as sight.</p>
+        </div>
+        <ol class="ob-steps">
+          <li><h3 class="ob-h3">Choose</h3><p class="ob-small">Discover a story about Earth’s lights, oceans, land, or atmosphere.</p></li>
+          <li><h3 class="ob-h3">Immerse</h3><p class="ob-small">Open the full-screen experience and listen at your own pace.</p></li>
+          <li><h3 class="ob-h3">Understand</h3><p class="ob-small">Read the science notes and explore the original NASA source.</p></li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="ex-footer">
+    <div class="ob-wrap">
+      <p class="ob-caption">Data and visualizations: <a href="https://svs.gsfc.nasa.gov/" target="_blank" rel="noopener">NASA Scientific Visualization Studio</a>.</p>
+      <p class="ob-caption">Explore experiences, sonifications, interactive sound maps and science notes: Reem.</p>
+    </div>
+  </footer>
+
+  <div data-ob-part="player"></div>
+</div>
+<!-- Scripts, in this order: the data, the shared runtime, then this page's own code. -->
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/explore/ocean.js"></script>
+<script src="js/explore/aerosols.js"></script>
+<script src="js/explore.js"></script>
+</body>
+</html>

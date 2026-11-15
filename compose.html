@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-theme="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORBEATS · Compose</title>
+<meta name="description" content="ORBEATS, the Earth Information Jukebox. See and hear NASA Earth data.">
+<link rel="icon" href="assets/orbeats-mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/compose.css">
+<link rel="stylesheet" href="js/tabs/compose/orbeat-board/board.css">
+</head>
+<body>
+<div class="ob-site">
+  <div data-ob-part="skip"></div>
+  <div data-ob-part="top" data-active="compose" class="ob-top--static"></div>
+
+  <main id="content" tabindex="-1" class="ob-page ob-page--lab">
+    <h1 class="ob-sr">Compose with Earth</h1>
+
+    <!-- The mount point, full width. ORBEATS.registerTab('compose', ...) empties this box and hands it to js/tabs/compose/compose.js. -->
+    <div class="ob-mount ob-mount--lab" data-ob-tab="compose">
+      <div class="ob-ph ob-ph--stage">Loading the Compose lab…</div>
+    </div>
+
+    <!-- Record, share and vote. Self-contained: js/tabs/compose/orbeat-board/ -->
+    <div class="ob-wrap ob-boardwrap"><section class="ob-board" data-ob-board aria-label="Record, share and vote"></section></div>
+  </main>
+
+  <div data-ob-part="player"></div>
+</div>
+<!-- Scripts, in this order: the data, the sound function, the shared runtime, then this page's own code. -->
+<!-- The audio tap must load before anything creates an AudioContext: it is what the Orbeat Board records from. -->
+<script src="js/audio-tap.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<!-- The Compose tab (Planet Opera): three.js, then the lab, then the page code. See js/tabs/compose/README.md -->
+<script src="vendor/three/three.bundle.js"></script>
+<script src="js/tabs/compose/compose-lab.js"></script>
+<script src="js/tabs/compose/compose.js"></script>
+<script src="js/tabs/compose/orbeat-board/config.js"></script>
+<script src="js/tabs/compose/orbeat-board/store.js"></script>
+<script src="js/tabs/compose/orbeat-board/board.js"></script>
+</body>
+</html>

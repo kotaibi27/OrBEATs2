@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" data-theme="space">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORBEATS · Components</title>
+<meta name="description" content="ORBEATS, the Earth Information Jukebox. See and hear NASA Earth data.">
+<link rel="icon" href="assets/orbeats-mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .cp-sec { padding: var(--space-12) 0; border-top: 1px solid var(--line); }
+  .cp-sec > .ob-label { margin-bottom: var(--space-6); }
+  .cp-sec .ob-pad { padding: 0; }
+  .cp-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: var(--space-8); }
+  .cp-swatch { display: grid; gap: var(--space-1); align-content: start; }
+  .cp-chip { height: 4rem; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); margin-bottom: var(--space-2); }
+  .cp-types { display: grid; gap: var(--space-8); }
+  .cp-type { display: grid; gap: var(--space-2); }
+  .cp-type > * { min-width: 0; overflow-wrap: anywhere; }
+  .is-focus { outline: 2px solid var(--focus); outline-offset: 3px; box-shadow: var(--glow-focus); }
+</style>
+</head>
+<body>
+<div class="ob-site">
+  <div data-ob-part="skip"></div>
+  <div data-ob-part="backdrop" class="ob-backdrop--fixed ob-backdrop--dim"></div>
+  <div data-ob-part="top"></div>
+  <main id="content" tabindex="-1" class="ob-page"><div class="ob-wrap">
+    <div class="ob-section__head"><p class="ob-label">Components</p><h1 class="ob-h1">The parts of ORBEATS</h1>
+      <p class="ob-small">For the team. This page is not linked from the site tabs.</p></div>
+    <section class="cp-sec"><h2 class="ob-label">Colors</h2><ul class="cp-swatches"><li class="cp-swatch"><span class="cp-chip" style="background: var(--bg-000)"></span><span class="ob-small" style="color: var(--ink-bright)">bg-000</span><span class="ob-caption">#03060c</span><span class="ob-caption">Page background. The near-black of space; every page starts here.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--bg-100)"></span><span class="ob-small" style="color: var(--ink-bright)">bg-100</span><span class="ob-caption">#0a1020</span><span class="ob-caption">Deep blue depth: viewer stage, empty media areas, the far end of fades.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--panel)"></span><span class="ob-small" style="color: var(--ink-bright)">panel</span><span class="ob-caption">#0e1830</span><span class="ob-caption">The one panel color: now-playing bar, help panel, raised areas. Never stack panels on panels.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--depth)"></span><span class="ob-small" style="color: var(--ink-bright)">depth</span><span class="ob-caption">#10294d</span><span class="ob-caption">Large quiet blue fields only: the cover and illustration. Never behind body text.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--line)"></span><span class="ob-small" style="color: var(--ink-bright)">line</span><span class="ob-caption">#22304a</span><span class="ob-caption">Decorative hairlines, always 1px: section rules, column dividers, row separators. Not for control borders.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--line-strong)"></span><span class="ob-small" style="color: var(--ink-bright)">line-strong</span><span class="ob-caption">#5b7396</span><span class="ob-caption">1px borders that carry meaning: buttons, switch tracks, slider tracks, dashed placeholders. At least 3:1 on bg-000 and panel.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--ink)"></span><span class="ob-small" style="color: var(--ink-bright)">ink</span><span class="ob-caption">#c9d6ea</span><span class="ob-caption">Body text on bg-000, bg-100 and panel. Soft blue-gray.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--ink-muted)"></span><span class="ob-small" style="color: var(--ink-bright)">ink-muted</span><span class="ob-caption">#8fa3bf</span><span class="ob-caption">Labels, captions, credits and bracketed placeholder text on bg-000, bg-100 and panel.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--ink-bright)"></span><span class="ob-small" style="color: var(--ink-bright)">ink-bright</span><span class="ob-caption">#eef4fc</span><span class="ob-caption">Headings, the wordmark and button text on bg-000, bg-100 and panel.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--neon)"></span><span class="ob-small" style="color: var(--ink-bright)">neon</span><span class="ob-caption">#4cc9ff</span><span class="ob-caption">The electric-blue accent, used sparingly: primary button, active tab line, on states, stat numbers, links. Reads as text on bg-000, bg-100 and panel.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--cyan)"></span><span class="ob-small" style="color: var(--ink-bright)">cyan</span><span class="ob-caption">#7ae7ff</span><span class="ob-caption">Second accent, rarer than neon: a share of the drifting stars, hover on links. Reads as text on bg-000 and panel.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--neon-dim)"></span><span class="ob-small" style="color: var(--ink-bright)">neon-dim</span><span class="ob-caption">rgba(76, 201, 255, 0.12)</span><span class="ob-caption">Faint fill behind an active or hovered control. Never a text color.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--on-neon)"></span><span class="ob-small" style="color: var(--ink-bright)">on-neon</span><span class="ob-caption">#03060c</span><span class="ob-caption">Text or icons placed on a solid neon or cyan fill.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--amber)"></span><span class="ob-small" style="color: var(--ink-bright)">amber</span><span class="ob-caption">#e0b060</span><span class="ob-caption">Tiny labels only, rarely: the Reference tag. Never a fill, border or button.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--scrim)"></span><span class="ob-small" style="color: var(--ink-bright)">scrim</span><span class="ob-caption">rgba(3, 6, 12, 0.74)</span><span class="ob-caption">The gentle dark layer over the background video on Play and Compose, and behind the accessibility bar.</span></li><li class="cp-swatch"><span class="cp-chip" style="background: var(--focus)"></span><span class="ob-small" style="color: var(--ink-bright)">focus</span><span class="ob-caption">{neon}</span><span class="ob-caption">Keyboard focus ring: 2px solid, 3px offset, on every interactive element.</span></li></ul></section>
+    <section class="cp-sec"><h2 class="ob-label">Type</h2><ul class="cp-types"><li class="cp-type"><span class="ob-label">ob-display · 4.5rem</span><span class="ob-display" style="color: var(--ink-bright)">ORBEATS</span></li><li class="cp-type"><span class="ob-label">ob-h1 · 3rem</span><span class="ob-h1" style="color: var(--ink-bright)">Science data should not need eyes.</span></li><li class="cp-type"><span class="ob-label">ob-h2 · 2.125rem</span><span class="ob-h2" style="color: var(--ink-bright)">Change in Night Lights between 2012 and 2023</span></li><li class="cp-type"><span class="ob-label">ob-h3 · 1.375rem</span><span class="ob-h3" style="color: var(--ink-bright)">Everyone can use it</span></li><li class="cp-type"><span class="ob-label">ob-numeral · 5.5rem</span><span class="ob-numeral" style="color: var(--ink-bright)">2.2</span></li><li class="cp-type"><span class="ob-label">ob-lead · 1.1875rem</span><span class="ob-lead" style="color: var(--ink-bright)">[One-line subtitle placeholder]</span></li><li class="cp-type"><span class="ob-label">ob-body · 1rem</span><span class="ob-body" style="color: var(--ink-bright)">Sea surface current flows colored by sea surface temperature.</span></li><li class="cp-type"><span class="ob-label">ob-small · 0.875rem</span><span class="ob-small" style="color: var(--ink-bright)">Released Friday, March 16, 2012</span></li><li class="cp-type"><span class="ob-label">ob-caption · 0.8125rem</span><span class="ob-caption" style="color: var(--ink-bright)">Each star in this Hubble image becomes a note.</span></li><li class="cp-type"><span class="ob-label">ob-label · 0.6875rem</span><span class="ob-label" style="color: var(--ink-bright)">NOW PLAYING</span></li><li class="cp-type"><span class="ob-label">ob-wordmark · 0.8125rem</span><span class="ob-wordmark" style="color: var(--ink-bright)">ORBEATS</span></li></ul></section>
+    <section class="cp-sec"><h2 class="ob-label">Logo</h2><div class="ob-pad" style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-12)">
+  <span class="ob-brand"><span data-ob-part="logo"></span><span class="ob-wordmark">ORBEATS</span></span>
+  <span class="ob-brand" style="gap:var(--space-6)"><svg class="ob-logo" style="width:4.5rem;height:4.5rem" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21"/><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="9"/><circle class="ob-logo__dot" cx="24" cy="24" r="2.5"/></svg><span class="ob-display" style="font-size:clamp(1rem,6vw,2.5rem);letter-spacing:.28em">ORBEATS</span></span>
+</div></section><section class="cp-sec"><h2 class="ob-label">Buttons</h2><div class="ob-pad" style="display:grid;gap:var(--space-8)">
+  <div class="ob-actions">
+    <button class="ob-btn ob-btn--primary ob-btn--lg" type="button" data-ob-action="music"><span data-ob-text>Tap to hear the music</span></button>
+    <a class="ob-btn ob-btn--lg" href="#">Explore the data</a>
+  </div>
+  <div class="ob-actions" style="align-items:center">
+    <button class="ob-btn ob-btn--primary" type="button">Primary</button>
+    <button class="ob-btn" type="button">Default</button>
+    <button class="ob-btn ob-btn--quiet" type="button">Quiet</button>
+    <button class="ob-btn" type="button" disabled>Disabled</button>
+    <button class="ob-play ob-play--sm" type="button" aria-pressed="false" aria-label="Play, small"></button>
+    <button class="ob-play" type="button" aria-pressed="false" aria-label="Play"></button>
+    <button class="ob-play ob-play--lg" type="button" aria-pressed="false" aria-label="Play, large"></button>
+  </div>
+</div></section><section class="cp-sec"><h2 class="ob-label">Switches</h2><div class="ob-pad" style="display:flex;flex-wrap:wrap;gap:var(--space-8)">
+  <span data-ob-part="switch" data-key="contrast" data-label="High contrast"></span>
+  <span data-ob-part="switch" data-key="audio" data-label="Audio"></span>
+  <span data-ob-part="switch" data-key="captions" data-label="Captions"></span>
+</div></section><section class="cp-sec"><h2 class="ob-label">Sliders</h2><div class="ob-pad" style="display:grid;gap:var(--space-4);max-width:28rem">
+  <label class="ob-field"><span class="ob-label">Volume</span><input class="ob-slider" type="range" min="0" max="100" value="80"></label>
+  <label class="ob-field"><span class="ob-label">Scrub</span><input class="ob-slider" type="range" min="0" max="100" value="0"></label>
+</div></section><section class="cp-sec"><h2 class="ob-label">Selector</h2><div class="ob-pad">
+  <fieldset class="ob-seg">
+    <legend class="ob-label">Controls</legend>
+    <label><input type="radio" name="controls" value="camera" checked><span>Camera and hand gestures</span></label>
+    <label><input type="radio" name="controls" value="keyboard"><span>Keyboard</span></label>
+    <label><input type="radio" name="controls" value="touch"><span>Touch</span></label>
+  </fieldset>
+</div></section><section class="cp-sec"><h2 class="ob-label">Focus ring</h2><style>.is-focus{outline:2px solid var(--focus);outline-offset:3px;box-shadow:var(--glow-focus)}</style>
+<div class="ob-pad" style="display:grid;gap:var(--space-6)">
+  <div class="ob-actions" style="align-items:center;gap:var(--space-12)">
+    <button class="ob-btn is-focus" type="button">Button</button>
+    <button class="ob-play is-focus" type="button" aria-label="Play"></button>
+    <a class="is-focus" href="#">Source page</a>
+    <button class="ob-switch is-focus" type="button" role="switch" aria-checked="true"><span class="ob-switch__track"></span><span>Captions</span></button>
+  </div>
+  <p class="ob-caption">Shown forced on. Press Tab in any preview to see the real ring.</p>
+</div></section><section class="cp-sec"><h2 class="ob-label">Placeholders</h2><div class="ob-pad" style="display:grid;gap:var(--space-6);max-width:44rem">
+  <p class="ob-lead ob-ph-text">[One-line subtitle placeholder]</p>
+  <div class="ob-ph">[Variables area]</div>
+  <div class="ob-ph ob-ph--stage" style="aspect-ratio:auto;min-height:7rem">[Game placeholder: one game goes here]</div>
+</div></section><section class="cp-sec"><h2 class="ob-label">Player bar</h2><div style="padding-top:var(--space-6)"><div data-ob-part="player" data-static></div></div></section><section class="cp-sec"><h2 class="ob-label">Catalog row</h2><div class="ob-pad"><ul class="ob-catalog" data-ob-catalog data-ids="5313,13786"></ul></div></section><section class="cp-sec"><h2 class="ob-label">Stats</h2><div class="ob-pad"><div class="ob-stats">
+  <div class="ob-stat">
+    <p class="ob-stat__num"><span data-ob-count="2.2" data-decimals="1">2.2</span> <span class="ob-stat__unit">billion</span></p>
+    <p>people live with a vision impairment</p>
+    <p class="ob-caption">Source: <a href="https://www.who.int/news-room/fact-sheets/detail/blindness-and-visual-impairment" target="_blank" rel="noopener">World Health Organization</a></p>
+  </div>
+  <div class="ob-stat">
+    <p class="ob-stat__num"><span data-ob-count="1.3" data-decimals="1">1.3</span> <span class="ob-stat__unit">billion</span></p>
+    <p>people, about 1 in 6, live with a significant disability</p>
+    <p class="ob-caption">Source: <a href="https://www.who.int/news-room/fact-sheets/detail/disability-and-health" target="_blank" rel="noopener">World Health Organization</a></p>
+  </div>
+  <div class="ob-stat">
+    <p class="ob-stat__num"><span data-ob-count="catalog">0</span></p>
+    <p>NASA Earth datasets in the catalog</p>
+    <p class="ob-caption">Source: <a href="https://svs.gsfc.nasa.gov/gallery/earth-information-center/" target="_blank" rel="noopener">NASA Scientific Visualization Studio</a></p>
+  </div>
+</div></div></section>
+  </div></main>
+  <div data-ob-part="player"></div>
+</div>
+<!-- Scripts, in this order: the data, the sound function, the shared runtime, then this page's own code. -->
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/explore.js"></script>
+</body>
+</html>
